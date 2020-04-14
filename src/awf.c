@@ -517,7 +517,7 @@ static void awf2_create_window () {
 	// base
 	#if GTK_CHECK_VERSION (3,98,0)
 		window = gtk_window_new ();
-		g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (g_main_loop_quit), NULL);
+		g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (exit), 0);
 	#else
 		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 		g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (gtk_main_quit), NULL);
@@ -534,8 +534,8 @@ static void awf2_create_window () {
 				gtk_container_add (GTK_CONTAINER (vbox_window), menubar);
 
 				toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-				gtk_widget_set_margin_top (menubar, 65);
 				gtk_container_add (GTK_CONTAINER (vbox_window), toolbar);
+				awf2_create_toolbar (toolbar);
 			#else
 				menubar = gtk_menu_bar_new ();
 				awf2_create_menubar (menubar);
@@ -577,7 +577,7 @@ static void awf2_create_window () {
 
 		// column 3
 		awf2_boxpack (GTK_BOX (hbox_columns), vbox_column3, TRUE, TRUE, 5, 0);
-			awf2_boxpack (GTK_BOX (vbox_column3), vbox_progressbar1, FALSE, TRUE, 5, 10);
+			awf2_boxpack (GTK_BOX (vbox_column3), vbox_progressbar1, FALSE, TRUE, 6, 10);
 			awf2_boxpack (GTK_BOX (vbox_column3), hbox_progressbar1, FALSE, FALSE, 5, 10);
 			awf2_boxpack (GTK_BOX (vbox_column3), hbox_progressbar2, FALSE, FALSE, 5, 10);
 			awf2_boxpack (GTK_BOX (vbox_column3), vbox_progressbar2, FALSE, TRUE, 5, 10);
@@ -662,9 +662,9 @@ static void awf2_create_window () {
 	// go
 	#if GTK_CHECK_VERSION (3,98,0)
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 4"));
-		//gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar");
+		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar-gtk4");
 		gtk_widget_show (window);
-		while (TRUE) g_main_context_iteration (NULL, TRUE);
+		while (TRUE) g_main_context_iteration(NULL, FALSE);
 	#elif GTK_CHECK_VERSION (3,0,0)
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 3"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar");
@@ -736,7 +736,7 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 	for (iterator = list_user_theme; iterator; iterator = iterator->next) {
 		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
 		#if !GTK_CHECK_VERSION (3,98,0)
-			gtk_radio_menu_item_set_group (GTK_RADIO_MENU_ITEM (menuitem), group);
+			group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
 		#endif
 		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf_set_theme), iterator->data);
 		#if !GTK_CHECK_VERSION (3,98,0)
@@ -810,7 +810,7 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 		awf2_new_menu_item (menu, "", "<Control>w", "gtk-close", TRUE);
 		menuitem = awf2_new_menu_item (menu, "", "<Control>q", "gtk-quit", FALSE);
 		#if GTK_CHECK_VERSION (3,98,0)
-			g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (g_main_loop_quit), NULL);
+			g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (exit), 0);
 		#else
 			g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (gtk_main_quit), NULL);
 		#endif
@@ -818,8 +818,46 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 
 static void awf2_create_toolbar (GtkWidget *root) {
 
-	#if !GTK_CHECK_VERSION (3,98,0)
+	#if GTK_CHECK_VERSION (3,98,0)
 
+		// https://developer.gnome.org/gtk4/stable/GtkButton.html
+		// https://developer.gnome.org/gtk4/stable/GtkToggleButton.html
+
+		GtkWidget *icon1, *icon2, *icon3, *icon4, *icon5, *icon6, *icon7, *icon8, *icon9, *menu;
+
+		icon1 = gtk_button_new ();
+		gtk_widget_set_size_request (icon1, 36, 36);
+		gtk_button_set_icon_name (GTK_BUTTON (icon1), "gtk-open");
+		g_signal_connect (G_OBJECT (icon1), "clicked", G_CALLBACK (awf2_show_dialog_open), NULL);
+
+		icon2 = gtk_button_new ();
+		gtk_widget_set_size_request (icon2, 36, 36);
+		gtk_button_set_icon_name (GTK_BUTTON (icon2), "gtk-open");
+		g_signal_connect (G_OBJECT (icon2), "clicked", G_CALLBACK (awf2_show_dialog_open_recent), NULL);
+
+		icon3 = gtk_button_new ();
+		gtk_widget_set_size_request (icon3, 36, 36);
+		gtk_button_set_icon_name (GTK_BUTTON (icon3), "gtk-save");
+		g_signal_connect (G_OBJECT (icon3), "clicked", G_CALLBACK (awf2_show_dialog_save), NULL);
+
+		icon4 = gtk_button_new ();
+		gtk_widget_set_size_request (icon4, 36, 36);
+		gtk_button_set_icon_name (GTK_BUTTON (icon4), "gtk-refresh");
+		g_signal_connect (G_OBJECT (icon4), "clicked", G_CALLBACK (awf_refresh_theme), NULL);
+
+
+		icon7 = gtk_toggle_button_new ();
+		gtk_widget_set_size_request (icon7, 36, 36);
+		gtk_button_set_icon_name (GTK_BUTTON (icon7), "gtk-add");
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (icon7), TRUE);
+		g_signal_connect (G_OBJECT (icon7), "clicked", G_CALLBACK (awf2_update_widgets), NULL);
+
+		gtk_container_add (GTK_CONTAINER (root), icon1);
+		gtk_container_add (GTK_CONTAINER (root), icon2);
+		gtk_container_add (GTK_CONTAINER (root), icon3);
+		gtk_container_add (GTK_CONTAINER (root), icon4);
+		gtk_container_add (GTK_CONTAINER (root), icon7);
+	#else
 		// https://developer.gnome.org/gtk3/stable/GtkToolbar.html
 		// https://developer.gnome.org/gtk3/stable/GtkMenuToolButton.html
 		// https://developer.gnome.org/gtk3/stable/GtkToolButton.html
@@ -962,9 +1000,11 @@ static void awf2_create_spinbuttons (GtkWidget *root) {
 
 	spinbutton1 = gtk_spin_button_new_with_range (-100, 100, 1);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON (spinbutton1), 1);
+	gtk_widget_set_tooltip_text (spinbutton1, "spin button");
 
 	spinbutton2 = gtk_spin_button_new_with_range (-100, 100, 1);
 	gtk_spin_button_set_value (GTK_SPIN_BUTTON (spinbutton2), 1);
+	gtk_widget_set_tooltip_text (spinbutton2, "spin button");
 	gtk_widget_set_sensitive (spinbutton2, FALSE);
 
 	awf2_boxpack (GTK_BOX (root), spinbutton1, FALSE, FALSE, 0, 0);
@@ -1154,13 +1194,13 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		gtk_widget_set_size_request (progressbar1, 170, -1);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar1), 0.5);
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (progressbar1), GTK_ORIENTATION_HORIZONTAL);
-		gtk_widget_set_tooltip_text (progressbar1, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar1, "progress bar");
 	#else
 		progressbar1 = gtk_progress_bar_new ();
 		gtk_widget_set_size_request (progressbar1, 170, -1);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar1), 0.5);
 		gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (progressbar1), GTK_PROGRESS_LEFT_TO_RIGHT);
-		gtk_widget_set_tooltip_text (progressbar1, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar1, "progress bar");
 	#endif
 
 	#if GTK_CHECK_VERSION (3,0,0)
@@ -1169,13 +1209,13 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar2), 0.5);
 		gtk_progress_bar_set_inverted (GTK_PROGRESS_BAR (progressbar2), TRUE);
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (progressbar2), GTK_ORIENTATION_HORIZONTAL);
-		gtk_widget_set_tooltip_text (progressbar2, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar2, "progress bar");
 	#else
 		progressbar2 = gtk_progress_bar_new ();
 		gtk_widget_set_size_request (progressbar2, 170, -1);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar2), 0.5);
 		gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (progressbar2), GTK_PROGRESS_RIGHT_TO_LEFT);
-		gtk_widget_set_tooltip_text (progressbar2, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar2, "progress bar");
 	#endif
 
 	#if GTK_CHECK_VERSION (3,2,0)
@@ -1217,13 +1257,13 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		gtk_widget_set_size_request (progressbar3, -1, 100);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar3), 0.5);
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (progressbar3), GTK_ORIENTATION_VERTICAL);
-		gtk_widget_set_tooltip_text (progressbar3, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar3, "progress bar");
 	#else
 		progressbar3 = gtk_progress_bar_new ();
 		gtk_widget_set_size_request (progressbar3, -1, 100);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar3), 0.5);
 		gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (progressbar3), GTK_PROGRESS_TOP_TO_BOTTOM);
-		gtk_widget_set_tooltip_text (progressbar3, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar3, "progress bar");
 	#endif
 
 	#if GTK_CHECK_VERSION (3,0,0)
@@ -1232,13 +1272,13 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar4), 0.5);
 		gtk_progress_bar_set_inverted (GTK_PROGRESS_BAR (progressbar4), TRUE);
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (progressbar4), GTK_ORIENTATION_VERTICAL);
-		gtk_widget_set_tooltip_text (progressbar4, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar4, "progress bar");
 	#else
 		progressbar4 = gtk_progress_bar_new ();
 		gtk_widget_set_size_request (progressbar4, -1, 100);
 		gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (progressbar4), 0.5);
 		gtk_progress_bar_set_orientation (GTK_PROGRESS_BAR (progressbar4), GTK_PROGRESS_BOTTOM_TO_TOP);
-		gtk_widget_set_tooltip_text (progressbar4, "progressbar");
+		gtk_widget_set_tooltip_text (progressbar4, "progress bar");
 	#endif
 
 	#if GTK_CHECK_VERSION (3,2,0)
@@ -1313,7 +1353,7 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		levelbar1 = gtk_level_bar_new ();
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar1), GTK_LEVEL_BAR_MODE_CONTINUOUS);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar1), 0.5);
-		gtk_widget_set_tooltip_text (levelbar1, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar1, "level bar");
 
 		levelbar2 = gtk_level_bar_new ();
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar2), GTK_LEVEL_BAR_MODE_CONTINUOUS);
@@ -1321,12 +1361,12 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		#if GTK_CHECK_VERSION (3,8,0)
 			gtk_level_bar_set_inverted (GTK_LEVEL_BAR (levelbar2), TRUE);
 		#endif
-		gtk_widget_set_tooltip_text (levelbar2, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar2, "level bar");
 
 		levelbar3 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar3), GTK_LEVEL_BAR_MODE_DISCRETE);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar3), 2);
-		gtk_widget_set_tooltip_text (levelbar3, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar3, "level bar");
 
 		levelbar4 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar4), GTK_LEVEL_BAR_MODE_DISCRETE);
@@ -1334,13 +1374,13 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		#if GTK_CHECK_VERSION (3,8,0)
 			gtk_level_bar_set_inverted (GTK_LEVEL_BAR (levelbar4), TRUE);
 		#endif
-		gtk_widget_set_tooltip_text (levelbar4, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar4, "level bar");
 
 		levelbar5 = gtk_level_bar_new ();
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar5), GTK_LEVEL_BAR_MODE_CONTINUOUS);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar5), 0.5);
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (levelbar5), GTK_ORIENTATION_VERTICAL);
-		gtk_widget_set_tooltip_text (levelbar5, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar5, "level bar");
 
 		levelbar6 = gtk_level_bar_new ();
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar6), GTK_LEVEL_BAR_MODE_CONTINUOUS);
@@ -1349,13 +1389,13 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 			gtk_level_bar_set_inverted (GTK_LEVEL_BAR (levelbar6), TRUE);
 		#endif
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (levelbar6), GTK_ORIENTATION_VERTICAL);
-		gtk_widget_set_tooltip_text (levelbar6, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar6, "level bar");
 
 		levelbar7 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar7), GTK_LEVEL_BAR_MODE_DISCRETE);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar7), 2);
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (levelbar7), GTK_ORIENTATION_VERTICAL);
-		gtk_widget_set_tooltip_text (levelbar7, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar7, "level bar");
 
 		levelbar8 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar8), GTK_LEVEL_BAR_MODE_DISCRETE);
@@ -1364,7 +1404,7 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 			gtk_level_bar_set_inverted (GTK_LEVEL_BAR (levelbar8), TRUE);
 		#endif
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (levelbar8), GTK_ORIENTATION_VERTICAL);
-		gtk_widget_set_tooltip_text (levelbar8, "levelbar");
+		gtk_widget_set_tooltip_text (levelbar8, "level bar");
 	#endif
 
 	gtk_container_add (GTK_CONTAINER (vroot1), progressbar1);
