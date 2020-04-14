@@ -530,7 +530,7 @@ static void awf2_create_window () {
 
 			#if GTK_CHECK_VERSION (3,98,0)
 				menubar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-				gtk_widget_set_margin_top (menubar, 35);
+				gtk_widget_set_margin_top (menubar, 25);
 				gtk_container_add (GTK_CONTAINER (vbox_window), menubar);
 
 				toolbar = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -828,34 +828,53 @@ static void awf2_create_toolbar (GtkWidget *root) {
 		icon1 = gtk_button_new ();
 		gtk_widget_set_size_request (icon1, 36, 36);
 		gtk_button_set_icon_name (GTK_BUTTON (icon1), "gtk-open");
+		gtk_style_context_add_class (gtk_widget_get_style_context (icon1), "flat");
 		g_signal_connect (G_OBJECT (icon1), "clicked", G_CALLBACK (awf2_show_dialog_open), NULL);
 
 		icon2 = gtk_button_new ();
 		gtk_widget_set_size_request (icon2, 36, 36);
 		gtk_button_set_icon_name (GTK_BUTTON (icon2), "gtk-open");
+		gtk_style_context_add_class (gtk_widget_get_style_context (icon2), "flat");
 		g_signal_connect (G_OBJECT (icon2), "clicked", G_CALLBACK (awf2_show_dialog_open_recent), NULL);
 
 		icon3 = gtk_button_new ();
 		gtk_widget_set_size_request (icon3, 36, 36);
 		gtk_button_set_icon_name (GTK_BUTTON (icon3), "gtk-save");
+		gtk_style_context_add_class (gtk_widget_get_style_context (icon3), "flat");
 		g_signal_connect (G_OBJECT (icon3), "clicked", G_CALLBACK (awf2_show_dialog_save), NULL);
 
 		icon4 = gtk_button_new ();
 		gtk_widget_set_size_request (icon4, 36, 36);
 		gtk_button_set_icon_name (GTK_BUTTON (icon4), "gtk-refresh");
+		gtk_style_context_add_class (gtk_widget_get_style_context (icon4), "flat");
 		g_signal_connect (G_OBJECT (icon4), "clicked", G_CALLBACK (awf_refresh_theme), NULL);
 
+		icon5 = gtk_button_new ();
+		gtk_widget_set_size_request (icon5, 36, 36);
+		gtk_button_set_icon_name (GTK_BUTTON (icon5), "gtk-goto-first");
+		gtk_style_context_add_class (gtk_widget_get_style_context (icon5), "flat");
+
+		icon6 = gtk_button_new ();
+		gtk_widget_set_size_request (icon6, 36, 36);
+		gtk_button_set_icon_name (GTK_BUTTON (icon6), "gtk-goto-last");
+		gtk_style_context_add_class (gtk_widget_get_style_context (icon6), "flat");
+		gtk_widget_set_sensitive (icon6, FALSE);
 
 		icon7 = gtk_toggle_button_new ();
 		gtk_widget_set_size_request (icon7, 36, 36);
 		gtk_button_set_icon_name (GTK_BUTTON (icon7), "gtk-add");
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (icon7), TRUE);
+		gtk_style_context_add_class (gtk_widget_get_style_context (icon7), "flat");
 		g_signal_connect (G_OBJECT (icon7), "clicked", G_CALLBACK (awf2_update_widgets), NULL);
 
 		gtk_container_add (GTK_CONTAINER (root), icon1);
 		gtk_container_add (GTK_CONTAINER (root), icon2);
 		gtk_container_add (GTK_CONTAINER (root), icon3);
 		gtk_container_add (GTK_CONTAINER (root), icon4);
+		gtk_container_add (GTK_CONTAINER (root), BOXVSEP);
+		gtk_container_add (GTK_CONTAINER (root), icon5);
+		gtk_container_add (GTK_CONTAINER (root), icon6);
+		gtk_container_add (GTK_CONTAINER (root), BOXVSEP);
 		gtk_container_add (GTK_CONTAINER (root), icon7);
 	#else
 		// https://developer.gnome.org/gtk3/stable/GtkToolbar.html
