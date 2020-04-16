@@ -38,7 +38,7 @@
  *  Ubuntu 15.10 (live) GTK 3.16
  *  Ubuntu 16.04 (live) GTK 3.18
  *  Ubuntu 16.10 (live) GTK 3.20
- *  Debian Testing      GTK 3.24 + GTK 3.98 + GTK 2.24
+ *  Debian Testing      GTK 3.24 + GTK 3.98 + GTK 2.24 + GLIB 2.64
  */
 
 // includes
@@ -155,7 +155,7 @@ static void awf2_scroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event)
 int main (int argc, char **argv) {
 
 	gint opt;
-	gchar *directory;
+	gchar *directory, *theme = "auto";
 	GSList *iterator;
 
 	// load themes
@@ -181,7 +181,7 @@ int main (int argc, char **argv) {
 			case 't':
 				if (g_slist_find_custom (list_system_theme, optarg, &awf_compare_theme) ||
 					g_slist_find_custom (list_user_theme, optarg, &awf_compare_theme))
-					awf_set_theme (optarg, NULL);
+					theme = (gchar*)optarg;
 				break;
 			case 'l':
 				g_printf ("Available themes:\n");
@@ -230,6 +230,10 @@ int main (int argc, char **argv) {
 		bindtextdomain (GETTEXT_PACKAGE, "/home/gtk324/awf/src");
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
+
+	// theme selected
+	if (theme != "auto")
+		awf_set_theme (theme, NULL);
 
 	// window
 	g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
