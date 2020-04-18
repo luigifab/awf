@@ -535,8 +535,10 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 	GtkWidget *hbox_frame1 = BOXH, *hbox_frame2 = BOXH, *hbox_notebook1 = BOXH, *hbox_notebook2 = BOXH;
 
 	// base
-	#if GTK_CHECK_VERSION (3,0,0)
+	#if GTK_CHECK_VERSION (3,4,0)
 		window = gtk_application_window_new (GTK_APPLICATION (app));
+	#elif GTK_CHECK_VERSION (3,0,0)
+		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	#else
 		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 		g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (gtk_main_quit), NULL);
