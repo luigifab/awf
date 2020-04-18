@@ -107,15 +107,15 @@ static void quit ();
 static GSList* awf_load_theme (gchar *directory);
 static void awf_exclude_theme (gpointer theme, gpointer unused);
 static gint awf_compare_theme (gconstpointer theme1, gconstpointer theme2);
-static void awf_set_theme (gpointer theme, gpointer unused);
-static void awf_refresh_theme (GtkWidget *unused1, gpointer unused2);
-static gboolean awf_sighup_handler (gpointer unused);
-static void awf_update_progressbars (GtkRange *range, gpointer unused);
+static void awf_set_theme (gpointer theme);
+static void awf_refresh_theme ();
+static gboolean awf_sighup_handler ();
+static void awf_update_progressbars (GtkRange *range);
 static void awf2_update_statusbar (gchar *text, gboolean withtime);
-static void awf2_update_widgets (GtkWidget *widget, gpointer unused);
-static gboolean awf2_take_screenshot (gpointer unused);
+static void awf2_update_widgets (GtkWidget *widget);
+static gboolean awf2_take_screenshot ();
 // widgets
-static void awf2_create_window ();
+static void awf2_create_window (gpointer app, gchar *theme);
 static void awf2_boxpack (GtkBox *box, GtkWidget *widget, gboolean fill, gboolean expand, guint padding, guint spacing);
 static void awf2_create_menubar (GtkWidget *menubar);
 static void awf2_create_toolbar (GtkWidget *root);
@@ -139,14 +139,14 @@ static GtkWidget* awf2_new_menu_check (GtkWidget *menu, gchar *text, gboolean ch
 static GtkWidget* awf2_new_menu_radio (GtkWidget *menu, gchar *text, gboolean checked, gboolean inconsistent, gboolean disabled, GSList *group);
 static GtkWidget* awf2_new_menu_item (GtkWidget *menu, gchar *text, gchar *accel, gchar *image, gboolean disabled);
 // dialogs
-static void awf2_show_dialog_open (GtkWidget *widget, gpointer unused);
-static void awf2_show_dialog_open_recent (GtkWidget *widget, gpointer unused);
-static void awf2_show_dialog_save (GtkWidget *widget, gpointer unused);
-static void awf2_show_dialog_properties (GtkWidget *widget, gpointer unused);
-static void awf2_show_dialog_page_setup (GtkWidget *widget, gpointer unused);
-static void awf2_show_dialog_print (GtkWidget *widget, gpointer unused);
-static void awf2_show_dialog_about (GtkWidget *widget, gpointer unused);
-static void awf2_show_dialog_calendar (GtkWidget *widget, gpointer unused);
+static void awf2_show_dialog_open (GtkWidget *widget);
+static void awf2_show_dialog_open_recent (GtkWidget *widget);
+static void awf2_show_dialog_save (GtkWidget *widget);
+static void awf2_show_dialog_properties (GtkWidget *widget);
+static void awf2_show_dialog_page_setup (GtkWidget *widget);
+static void awf2_show_dialog_print (GtkWidget *widget);
+static void awf2_show_dialog_about (GtkWidget *widget);
+static void awf2_show_dialog_calendar (GtkWidget *widget);
 // gtk3
 #if GTK_CHECK_VERSION (3,4,0) && !GTK_CHECK_VERSION (3,98,0)
 static void awf2_scroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event);
@@ -156,6 +156,7 @@ static void awf2_scroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event)
 
 int main (int argc, char **argv) {
 
+	int status = 0;
 	gint opt;
 	gchar *directory, *theme = "auto";
 	GSList *iterator;
@@ -207,20 +208,14 @@ int main (int argc, char **argv) {
 					#endif
 					glib_major_version, glib_minor_version, glib_micro_version);
 				g_printf ("Usage: awf-gtk2 (for gtk 2.24+) or awf-gtk3 (for gtk 3.0+) or awf-gtk4 (for gtk 3.98+)\n");
-				g_printf (" %s %s\n", "-v ", "Show version number (and quit)");
-				g_printf (" %s %s\n", "-l ", "List available themes (and quit)");
-				g_printf (" %s %s\n", "-t <theme> ", "Run with the specified theme");
+				g_printf (" %s %s\n", "-v", "Show version number (and quit)");
+				g_printf (" %s %s\n", "-l", "List available themes (and quit)");
+				g_printf (" %s %s\n", "-t <theme>   ", "Run with the specified theme");
 				g_printf (" %s %s\n", "-s <filename>", "Run and take/save a png screenshot on sighup");
 				g_printf ("\n");
 				return 0;
 		}
 	}
-
-	#if GTK_CHECK_VERSION (3,98,0)
-		gtk_init ();
-	#else
-		gtk_init (&argc, &argv);
-	#endif
 
 	// locale
 	setlocale (LC_ALL, "");
@@ -233,18 +228,23 @@ int main (int argc, char **argv) {
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	// theme selected
-	if (theme != "auto")
-		awf_set_theme (theme, NULL);
-
-	// window
-	g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
+	// create and show window
 	#if GLIB_CHECK_VERSION (2,30,0)
 		g_unix_signal_add (SIGHUP, awf_sighup_handler, NULL); // glib >= 2.30
 	#endif
-	awf2_create_window ();
 
-	return 0;
+	#if GTK_CHECK_VERSION (3,0,0)
+		GtkApplication *app;
+		app = gtk_application_new ("org.gtk.awf", G_APPLICATION_FLAGS_NONE);
+		g_signal_connect (app, "activate", G_CALLBACK (awf2_create_window), theme);
+		status = g_application_run (G_APPLICATION (app), argc, argv);
+		g_object_unref (app);
+	#else
+		gtk_init (&argc, &argv);
+		awf2_create_window (NULL, theme);
+	#endif
+
+	return status;
 }
 
 static void quit () {
@@ -311,7 +311,7 @@ static gint awf_compare_theme (gconstpointer theme1, gconstpointer theme2) {
 	return g_strcmp0 ((gchar*)theme1, (gchar*)theme2);
 }
 
-static void awf_set_theme (gpointer theme, gpointer unused) {
+static void awf_set_theme (gpointer theme) {
 
 	g_object_set (gtk_settings_get_default (), "gtk-theme-name", (gchar*)theme,  NULL);
 	g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
@@ -323,7 +323,7 @@ static void awf_set_theme (gpointer theme, gpointer unused) {
 		awf2_update_statusbar (g_strdup_printf (_("Theme %s loaded."), current_theme), FALSE);
 }
 
-static void awf_refresh_theme (GtkWidget *unused1, gpointer unused2) {
+static void awf_refresh_theme () {
 
 	gchar *default_theme = NULL;
 
@@ -348,13 +348,13 @@ static void awf_refresh_theme (GtkWidget *unused1, gpointer unused2) {
 	}
 }
 
-static gboolean awf_sighup_handler (gpointer unused) {
+static gboolean awf_sighup_handler () {
 
-	awf_refresh_theme (NULL, NULL);
+	awf_refresh_theme ();
 	return G_SOURCE_CONTINUE;
 }
 
-static void awf_update_progressbars (GtkRange *range, gpointer unused) {
+static void awf_update_progressbars (GtkRange *range) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkProgressBar.html
 	// https://developer.gnome.org/gtk3/stable/GtkLevelBar.html
@@ -403,6 +403,8 @@ static void awf_update_progressbars (GtkRange *range, gpointer unused) {
 
 static void awf2_update_statusbar (gchar *text, gboolean withtime) {
 
+	// https://developer.gnome.org/gtk3/stable/GtkStatusbar.html
+
 	char buffer[12];
 	time_t rawtime;
 	struct tm *timeinfo;
@@ -420,14 +422,12 @@ static void awf2_update_statusbar (gchar *text, gboolean withtime) {
 	}
 }
 
-static void awf2_update_widgets (GtkWidget *widget, gpointer unused) {
+static void awf2_update_widgets (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkNotebook.html
 	// https://developer.gnome.org/gtk3/stable/GtkSpinButton.html
 	// https://developer.gnome.org/gtk3/stable/GtkProgressBar.html
 	// https://developer.gnome.org/gtk3/stable/GtkScale.html
-
-	gchar *progress_text;
 
 	if (gtk_notebook_get_scrollable (GTK_NOTEBOOK (notebook1))) {
 
@@ -467,6 +467,7 @@ static void awf2_update_widgets (GtkWidget *widget, gpointer unused) {
 			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar1), TRUE);
 			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar3), TRUE);
 		#else
+			gchar *progress_text;
 			progress_text = g_strdup_printf ("%i %%", (int)gtk_range_get_value (GTK_RANGE (scale1)));
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar1), progress_text);
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar3), progress_text);
@@ -488,7 +489,7 @@ static void awf2_update_widgets (GtkWidget *widget, gpointer unused) {
 	}
 }
 
-static gboolean awf2_take_screenshot (gpointer unused) {
+static gboolean awf2_take_screenshot () {
 
 	#if GTK_CHECK_VERSION (3,98,0)
 		GdkSurface *root;
@@ -523,9 +524,11 @@ static gboolean awf2_take_screenshot (gpointer unused) {
 
 // layout
 
-static void awf2_create_window () {
+static void awf2_create_window (gpointer app, gchar *theme) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkContainer.html
+	// https://developer.gnome.org/gtk3/stable/GtkApplication.html
+	// https://developer.gnome.org/gtk3/stable/gtk-getting-started.html
 
 	GtkWidget *vbox_window, *menubar, *toolbar, *widgets;
 	GtkWidget *hbox_columns = BOXH, *vseparator1 = BOXVSEP, *vseparator2 = BOXVSEP, *vseparator3 = BOXVSEP, *hseparator1 = BOXHSEP;
@@ -537,8 +540,8 @@ static void awf2_create_window () {
 	GtkWidget *hbox_frame1 = BOXH, *hbox_frame2 = BOXH, *hbox_notebook1 = BOXH, *hbox_notebook2 = BOXH;
 
 	// base
-	#if GTK_CHECK_VERSION (3,98,0)
-		window = gtk_window_new ();
+	#if GTK_CHECK_VERSION (3,0,0)
+		window = gtk_application_window_new (GTK_APPLICATION (app));
 	#else
 		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	#endif
@@ -546,33 +549,39 @@ static void awf2_create_window () {
 	gtk_window_set_icon_name (GTK_WINDOW (window), "awf");
 	g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (quit), NULL);
 
-		vbox_window = BOXV;
-		gtk_container_add (GTK_CONTAINER (window), vbox_window);
+	if (theme != "auto")
+		awf_set_theme (theme);
+	else
+		g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
 
-			#if GTK_CHECK_VERSION (3,98,0)
-				menubar = BOXH;
-				gtk_widget_set_margin_top (menubar, 25);
-				awf2_boxpack (GTK_BOX (vbox_window), menubar, FALSE, FALSE, 0, 0);
+	// base layout
+	vbox_window = BOXV;
+	gtk_container_add (GTK_CONTAINER (window), vbox_window);
 
-				toolbar = BOXH;
-				awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
-				awf2_create_toolbar (toolbar);
-			#else
-				menubar = gtk_menu_bar_new ();
-				awf2_create_menubar (menubar);
-				awf2_boxpack (GTK_BOX (vbox_window), menubar, FALSE, FALSE, 0, 0);
+		#if GTK_CHECK_VERSION (3,98,0)
+			menubar = BOXH;
+			gtk_widget_set_margin_top (menubar, 25);
+			awf2_boxpack (GTK_BOX (vbox_window), menubar, FALSE, FALSE, 0, 0);
 
-				toolbar = gtk_toolbar_new ();
-				awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
-				awf2_create_toolbar (toolbar);
-			#endif
+			toolbar = BOXH;
+			awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
+			awf2_create_toolbar (toolbar);
+		#else
+			menubar = gtk_menu_bar_new ();
+			awf2_create_menubar (menubar);
+			awf2_boxpack (GTK_BOX (vbox_window), menubar, FALSE, FALSE, 0, 0);
 
-			widgets = BOXV;
-			awf2_boxpack (GTK_BOX (vbox_window), widgets, TRUE, TRUE, 0, 0);
+			toolbar = gtk_toolbar_new ();
+			awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
+			awf2_create_toolbar (toolbar);
+		#endif
 
-		statusbar = gtk_statusbar_new ();
-		awf2_boxpack (GTK_BOX (vbox_window), statusbar, FALSE, FALSE, 0, 0);
-		awf2_update_statusbar (g_strdup_printf (_("AWF %s / Theme %s loaded."), VERSION, current_theme), FALSE);
+		widgets = BOXV;
+		awf2_boxpack (GTK_BOX (vbox_window), widgets, TRUE, TRUE, 0, 0);
+
+	statusbar = gtk_statusbar_new ();
+	awf2_boxpack (GTK_BOX (vbox_window), statusbar, FALSE, FALSE, 0, 0);
+	awf2_update_statusbar (g_strdup_printf (_("AWF %s / Theme %s loaded."), VERSION, current_theme), FALSE);
 
 	// columns layout
 	awf2_boxpack (GTK_BOX (widgets), hbox_columns, TRUE, TRUE, 0, 0);
@@ -685,12 +694,10 @@ static void awf2_create_window () {
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 4"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar-gtk4");
 		gtk_widget_show (window);
-		while (TRUE) g_main_context_iteration (NULL, FALSE);
 	#elif GTK_CHECK_VERSION (3,0,0)
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 3"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar");
 		gtk_widget_show_all (window);
-		gtk_main ();
 	#else
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 2"));
 		gtk_widget_show_all (window);
@@ -1142,11 +1149,15 @@ static void awf2_create_otherbuttons (GtkWidget *root) {
 	button2 = gtk_button_new_with_label ("Button 2");
 	gtk_widget_set_sensitive (button2, FALSE);
 
+	// https://developer.gnome.org/gtk3/stable/GtkToggleButton.html
+
 	button3 = gtk_toggle_button_new_with_label ("Toggle button 1");
 
 	button4 = gtk_toggle_button_new_with_label ("Toggle button 2");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button3), TRUE);
 	gtk_widget_set_sensitive (button4, FALSE);
+
+	// https://developer.gnome.org/gtk3/stable/GtkColorButton.html
 
 	#if GTK_CHECK_VERSION (3,0,0)
 		GdkRGBA color;
@@ -1797,7 +1808,7 @@ static GtkWidget* awf2_new_menu_item (GtkWidget *menu, gchar *text, gchar *accel
 
 // dialogs
 
-static void awf2_show_dialog_open (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_open (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkFileChooserDialog.html
 
@@ -1818,7 +1829,7 @@ static void awf2_show_dialog_open (GtkWidget *widget, gpointer unused) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_open_recent (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_open_recent (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkRecentChooserDialog.html
 
@@ -1841,7 +1852,7 @@ static void awf2_show_dialog_open_recent (GtkWidget *widget, gpointer unused) {
 	#endif
 }
 
-static void awf2_show_dialog_save (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_save (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkFileChooserDialog.html
 
@@ -1862,7 +1873,7 @@ static void awf2_show_dialog_save (GtkWidget *widget, gpointer unused) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_properties (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_properties (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkMessageDialog.html
 
@@ -1883,7 +1894,7 @@ static void awf2_show_dialog_properties (GtkWidget *widget, gpointer unused) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_page_setup (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_page_setup (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkPageSetupUnixDialog.html
 
@@ -1898,7 +1909,7 @@ static void awf2_show_dialog_page_setup (GtkWidget *widget, gpointer unused) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_print (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_print (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkPrintUnixDialog.html
 
@@ -1913,7 +1924,7 @@ static void awf2_show_dialog_print (GtkWidget *widget, gpointer unused) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_about (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_about (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkAboutDialog.html
 
@@ -1940,11 +1951,12 @@ static void awf2_show_dialog_about (GtkWidget *widget, gpointer unused) {
 		NULL);
 }
 
-static void awf2_show_dialog_calendar (GtkWidget *widget, gpointer unused) {
+static void awf2_show_dialog_calendar (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkDialog.html
 	// https://developer.gnome.org/gtk3/stable/GtkInfoBar.html
 	// https://developer.gnome.org/gtk3/stable/GtkCalendar.html
+	// https://developer.gnome.org/gtk4/stable/GtkCalendar.html
 
 	GtkWidget *dialog, *infobar, *label, *calendar, *vbox = BOXV;
 	GtkContainer *area;
