@@ -697,10 +697,15 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 4"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar-gtk4");
 		gtk_widget_show (window);
+	#elif GTK_CHECK_VERSION (3,4,0)
+		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 3"));
+		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar");
+		gtk_widget_show_all (window);
 	#elif GTK_CHECK_VERSION (3,0,0)
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 3"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar");
 		gtk_widget_show_all (window);
+		gtk_main ();
 	#else
 		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 2"));
 		gtk_widget_show_all (window);
