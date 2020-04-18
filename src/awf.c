@@ -873,7 +873,8 @@ static void awf2_create_toolbar (GtkWidget *root) {
 		gtk_style_context_add_class (gtk_widget_get_style_context (icon6), "flat");
 		gtk_widget_set_sensitive (icon6, FALSE);
 
-		icon7 = gtk_button_new_from_icon_name ("gtk-add");
+		icon7 = gtk_toggle_button_new ();
+		gtk_button_set_icon_name (GTK_BUTTON (icon7), "gtk-add");
 		gtk_widget_set_size_request (icon7, 36, 36);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (icon7), TRUE);
 		gtk_style_context_add_class (gtk_widget_get_style_context (icon7), "flat");
