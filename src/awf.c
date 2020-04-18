@@ -566,6 +566,12 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 			toolbar = BOXH;
 			awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
 			awf2_create_toolbar (toolbar);
+		//#elif GTK_CHECK_VERSION (3,4,0)
+		//	gtk_application_set_menubar (app, NULL);
+		//
+		//	toolbar = gtk_toolbar_new ();
+		//	awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
+		//	awf2_create_toolbar (toolbar);
 		#else
 			menubar = gtk_menu_bar_new ();
 			awf2_create_menubar (menubar);
