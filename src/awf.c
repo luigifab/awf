@@ -129,6 +129,7 @@ static void awf2_create_spinners (GtkWidget *root);
 static void awf2_create_expander (GtkWidget *root);
 static void awf2_create_frames (GtkWidget *lroot, GtkWidget *rroot);
 static void awf2_create_notebooks (GtkWidget *lroot, GtkWidget *rroot);
+static void awf2_create_notebook_tab (GtkWidget *notebook, gchar *text);
 static void awf2_create_treview (GtkWidget *root);
 // menuitems
 static GtkWidget* awf2_new_menu (GtkWidget *root, gchar *text);
@@ -147,8 +148,10 @@ static void awf2_show_dialog_print (GtkWidget *widget);
 static void awf2_show_dialog_about (GtkWidget *widget);
 static void awf2_show_dialog_calendar (GtkWidget *widget);
 // gtk3
-#if GTK_CHECK_VERSION (3,4,0) && !GTK_CHECK_VERSION (3,98,0)
-static void awf2_scroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event);
+#if GTK_CHECK_VERSION (3,98,0)
+static void awf2_evtscroll_notebook_tabs (GtkEventControllerScroll *event, gdouble dx, gdouble dy, GtkWidget *widget);
+#elif GTK_CHECK_VERSION (3,4,0)
+static void awf2_gdkscroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event);
 #endif
 
 // run baby, run!
@@ -1599,66 +1602,98 @@ static void awf2_create_frames (GtkWidget *lroot, GtkWidget *rroot) {
 static void awf2_create_notebooks (GtkWidget *lroot, GtkWidget *rroot) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkNotebook.html
-
-	int i;
-	GtkWidget *tab;
+	// https://developer.gnome.org/gtk3/stable/GtkEventControllerScroll.html
 
 	notebook1 = gtk_notebook_new ();
 	notebook2 = gtk_notebook_new ();
 	notebook3 = gtk_notebook_new ();
 	notebook4 = gtk_notebook_new ();
 
-	#if GTK_CHECK_VERSION (3,4,0) && !GTK_CHECK_VERSION (3,98,0)
+	#if GTK_CHECK_VERSION (3,98,0)
+		GtkEventController *event1, *event2, *event3, *event4;
+		event1 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
+		g_signal_connect (event1, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook1);
+		gtk_widget_add_controller (notebook1, event1);
+		event2 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+		g_signal_connect (event2, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook2);
+		gtk_widget_add_controller (notebook2, event2);
+		event3 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+		g_signal_connect (event3, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook3);
+		gtk_widget_add_controller (notebook3, event3);
+		event4 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+		g_signal_connect (event4, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook4);
+		gtk_widget_add_controller (notebook4, event4);
+	//elif GTK_CHECK_VERSION (3,24,0)
+	//	GtkEventController *event1, *event2, *event3, *event4;
+	//	event1 = gtk_event_controller_scroll_new (notebook1, GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
+	//	g_signal_connect (event1, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook1);
+	//	event2 = gtk_event_controller_scroll_new (notebook2, GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	//	g_signal_connect (event2, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook2);
+	//	event3 = gtk_event_controller_scroll_new (notebook3, GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	//	g_signal_connect (event3, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook3);
+	//	event4 = gtk_event_controller_scroll_new (notebook4, GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	//	g_signal_connect (event4, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook4);
+	#elif GTK_CHECK_VERSION (3,4,0)
 		gtk_widget_add_events (notebook1, GDK_SCROLL_MASK);
-		g_signal_connect (notebook1, "scroll-event", G_CALLBACK (awf2_scroll_notebook_tabs), NULL);
+		g_signal_connect (notebook1, "scroll-event", G_CALLBACK (awf2_gdkscroll_notebook_tabs), NULL);
 		gtk_widget_add_events (notebook2, GDK_SCROLL_MASK);
-		g_signal_connect (notebook2, "scroll-event", G_CALLBACK (awf2_scroll_notebook_tabs), NULL);
+		g_signal_connect (notebook2, "scroll-event", G_CALLBACK (awf2_gdkscroll_notebook_tabs), NULL);
 		gtk_widget_add_events (notebook3, GDK_SCROLL_MASK);
-		g_signal_connect (notebook3, "scroll-event", G_CALLBACK (awf2_scroll_notebook_tabs), NULL);
+		g_signal_connect (notebook3, "scroll-event", G_CALLBACK (awf2_gdkscroll_notebook_tabs), NULL);
 		gtk_widget_add_events (notebook4, GDK_SCROLL_MASK);
-		g_signal_connect (notebook4, "scroll-event", G_CALLBACK (awf2_scroll_notebook_tabs), NULL);
+		g_signal_connect (notebook4, "scroll-event", G_CALLBACK (awf2_gdkscroll_notebook_tabs), NULL);
 	#endif
 
 	gtk_notebook_popup_enable (GTK_NOTEBOOK (notebook1));
 	gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook1), FALSE);
 	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook1), GTK_POS_TOP);
-	for (i = 1; i <= 4; i++) {
-		tab = gtk_label_new ("");
-		gtk_notebook_append_page (GTK_NOTEBOOK (notebook1), tab, gtk_label_new (g_strdup_printf ("tab%d", i)));
-		gtk_notebook_set_tab_reorderable (GTK_NOTEBOOK (notebook1), tab, TRUE);
-	}
+		awf2_create_notebook_tab (notebook1, "tab1");
+		awf2_create_notebook_tab (notebook1, "tab2");
+		awf2_create_notebook_tab (notebook1, "tab3");
+		awf2_create_notebook_tab (notebook1, "tab4");
 
 	gtk_notebook_popup_enable (GTK_NOTEBOOK (notebook2));
 	gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook2), FALSE);
 	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook2), GTK_POS_BOTTOM);
-	for (i = 1; i <= 4; i++) {
-		tab = gtk_label_new ("");
-		gtk_notebook_append_page (GTK_NOTEBOOK (notebook2), tab, gtk_label_new (g_strdup_printf ("tab%d", i)));
-		gtk_notebook_set_tab_reorderable (GTK_NOTEBOOK (notebook2), tab, TRUE);
-	}
+		awf2_create_notebook_tab (notebook2, "tab1");
+		awf2_create_notebook_tab (notebook2, "tab2");
+		awf2_create_notebook_tab (notebook2, "tab3");
+		awf2_create_notebook_tab (notebook2, "tab4");
 
 	gtk_notebook_popup_enable (GTK_NOTEBOOK (notebook3));
 	gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook3), FALSE);
 	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook3), GTK_POS_LEFT);
-	for (i = 1; i <= 4; i++) {
-		tab = gtk_label_new ("");
-		gtk_notebook_append_page (GTK_NOTEBOOK (notebook3), tab, gtk_label_new (g_strdup_printf ("tab%d", i)));
-		gtk_notebook_set_tab_reorderable (GTK_NOTEBOOK (notebook3), tab, TRUE);
-	}
+		awf2_create_notebook_tab (notebook3, "tab1");
+		awf2_create_notebook_tab (notebook3, "tab2");
+		awf2_create_notebook_tab (notebook3, "tab3");
+		awf2_create_notebook_tab (notebook3, "tab4");
 
 	gtk_notebook_popup_enable (GTK_NOTEBOOK (notebook4));
 	gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook4), FALSE);
 	gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook4), GTK_POS_RIGHT);
-	for (i = 1; i <= 4; i++) {
-		tab = gtk_label_new ("");
-		gtk_notebook_append_page (GTK_NOTEBOOK (notebook4), tab, gtk_label_new (g_strdup_printf ("tab%d", i)));
-		gtk_notebook_set_tab_reorderable (GTK_NOTEBOOK (notebook4), tab, TRUE);
-	}
+		awf2_create_notebook_tab (notebook4, "tab1");
+		awf2_create_notebook_tab (notebook4, "tab2");
+		awf2_create_notebook_tab (notebook4, "tab3");
+		awf2_create_notebook_tab (notebook4, "tab4");
 
 	gtk_container_add (GTK_CONTAINER (lroot), notebook1);
 	gtk_container_add (GTK_CONTAINER (lroot), notebook2);
 	gtk_container_add (GTK_CONTAINER (rroot), notebook3);
 	gtk_container_add (GTK_CONTAINER (rroot), notebook4);
+}
+
+static void awf2_create_notebook_tab (GtkWidget *notebook, gchar *text) {
+
+	// https://developer.gnome.org/gtk3/stable/GtkNotebook.html
+	// https://developer.gnome.org/gtk3/stable/GtkEventControllerScroll.html
+
+	GtkWidget *head, *content;
+
+	head = gtk_label_new (text);
+	content = BOXV;
+
+	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), content, head);
+	gtk_notebook_set_tab_reorderable (GTK_NOTEBOOK (notebook), content, TRUE);
 }
 
 static void awf2_create_treview (GtkWidget *root) {
@@ -2029,10 +2064,49 @@ static void awf2_show_dialog_calendar (GtkWidget *widget) {
 }
 
 // https://github.com/mate-desktop/mate-control-center/blob/master/capplets/common/capplet-util.c
-// source function capplet_dialog_page_scroll_event_cb of mate-appearance-properties from mate-control-center, GNU GPL 2
+// for awf2_gdkscroll_notebook_tabs source function is capplet_dialog_page_scroll_event_cb
+// of mate-appearance-properties from mate-control-center, GNU GPL 2
 
-#if GTK_CHECK_VERSION (3,4,0) && !GTK_CHECK_VERSION (3,98,0)
-static void awf2_scroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event) {
+#if GTK_CHECK_VERSION (3,98,0)
+static void awf2_evtscroll_notebook_tabs (GtkEventControllerScroll *event, gdouble dx, gdouble dy, GtkWidget *widget) {
+
+	GtkNotebook *notebook;
+	GtkWidget *child, *event_widget, *action_widget;
+
+	g_printf ("go\n");
+	#if GTK_CHECK_VERSION (3,98,0)
+		//g_printf ("%s\n", gtk_widget_get_css_classes (widget));
+	#endif
+
+	while (!GTK_IS_NOTEBOOK (widget))
+		widget = gtk_widget_get_parent (widget);
+
+	notebook = GTK_NOTEBOOK (widget);
+
+	child = gtk_notebook_get_nth_page (notebook, gtk_notebook_get_current_page (notebook));
+	if (child == NULL)
+		return;
+
+	// ignore scroll events from the content of the page
+	event_widget = gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (event));
+	if (event_widget == NULL || event_widget == child || gtk_widget_is_ancestor (event_widget, child))
+		return;
+
+	// and also from the action widgets
+	action_widget = gtk_notebook_get_action_widget (notebook, GTK_PACK_START);
+	if (event_widget == action_widget || (action_widget != NULL && gtk_widget_is_ancestor (event_widget, action_widget)))
+		return;
+	action_widget = gtk_notebook_get_action_widget (notebook, GTK_PACK_END);
+	if (event_widget == action_widget || (action_widget != NULL && gtk_widget_is_ancestor (event_widget, action_widget)))
+		return;
+
+	if ((dy > 0) || (dx > 0))
+		gtk_notebook_next_page (notebook);
+	else if ((dy < 0) || (dx < 0))
+		gtk_notebook_prev_page (notebook);
+}
+#elif GTK_CHECK_VERSION (3,4,0)
+static void awf2_gdkscroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event) {
 
 	GtkNotebook *notebook = GTK_NOTEBOOK (widget);
 	GtkWidget *child, *event_widget, *action_widget;
@@ -2041,23 +2115,20 @@ static void awf2_scroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event)
 	if (child == NULL)
 		return;
 
-	event_widget = gtk_get_event_widget ((GdkEvent *)event);
-
-	// Ignore scroll events from the content of the page
+	// ignore scroll events from the content of the page
+	event_widget = gtk_get_event_widget ((GdkEvent*) event);
 	if (event_widget == NULL || event_widget == child || gtk_widget_is_ancestor (event_widget, child))
 		return;
 
-	// And also from the action widgets
+	// and also from the action widgets
 	action_widget = gtk_notebook_get_action_widget (notebook, GTK_PACK_START);
 	if (event_widget == action_widget || (action_widget != NULL && gtk_widget_is_ancestor (event_widget, action_widget)))
 		return;
-
 	action_widget = gtk_notebook_get_action_widget (notebook, GTK_PACK_END);
 	if (event_widget == action_widget || (action_widget != NULL && gtk_widget_is_ancestor (event_widget, action_widget)))
 		return;
 
-	switch (event->direction)
-	{
+	switch (event->direction) {
 		case GDK_SCROLL_RIGHT:
 		case GDK_SCROLL_DOWN:
 			gtk_notebook_next_page (notebook);
@@ -2067,8 +2138,7 @@ static void awf2_scroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *event)
 			gtk_notebook_prev_page (notebook);
 			break;
 		case GDK_SCROLL_SMOOTH:
-			switch (gtk_notebook_get_tab_pos (notebook))
-			{
+			switch (gtk_notebook_get_tab_pos (notebook)) {
 				case GTK_POS_LEFT:
 				case GTK_POS_RIGHT:
 					if (event->delta_y > 0)
