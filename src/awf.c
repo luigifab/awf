@@ -103,7 +103,6 @@ static gchar *screenshot;
 
 // local functions
 
-static void quit ();
 static GSList* awf_load_theme (gchar *directory);
 static void awf_exclude_theme (gpointer theme, gpointer unused);
 static gint awf_compare_theme (gconstpointer theme1, gconstpointer theme2);
@@ -245,10 +244,6 @@ int main (int argc, char **argv) {
 	#endif
 
 	return status;
-}
-
-static void quit () {
-	exit (0);
 }
 
 static GSList* awf_load_theme (gchar *directory) {
@@ -544,10 +539,10 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 		window = gtk_application_window_new (GTK_APPLICATION (app));
 	#else
 		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+		g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (gtk_main_quit), NULL);
 	#endif
 
 	gtk_window_set_icon_name (GTK_WINDOW (window), "awf");
-	g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (quit), NULL);
 
 	if (theme != "auto")
 		awf_set_theme (theme);
@@ -845,7 +840,7 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 		awf2_new_menu_separator (menu);
 		awf2_new_menu_item (menu, "", "<Control>w", "gtk-close", TRUE);
 		menuitem = awf2_new_menu_item (menu, "", "<Control>q", "gtk-quit", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (quit), NULL);
+		//g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (), NULL);
 }
 
 static void awf2_create_toolbar (GtkWidget *root) {
