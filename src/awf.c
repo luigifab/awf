@@ -1,11 +1,13 @@
 /**
- * Copyright 2020      | Fabrice Creuzot (luigifab) <code~luigifab~fr>
+ * Copyright 2020 | Fabrice Creuzot (luigifab) <code~luigifab~fr>
  * https://github.com/luigifab/awf
  *
- * Copyright 2011-2017 | Valère Monseur <valere~monseur~ymail~com>
- * https://github.com/valr/awf
+ * Forked from
+ *  Copyright 2011-2017 | Valère Monseur <valere~monseur~ymail~com>
+ *  https://github.com/valr/awf
  *
- * AWF is originally based on the code from The Widget Factory created by Richard Stellingwerff <remenic~gmail~com>
+ *  AWF is originally based on the code from The Widget Factory
+ *  created by Richard Stellingwerff <remenic~gmail~com>
  *
  * This program is free software, you can redistribute it or modify
  * it under the terms of the GNU General Public License (GPL) as published
@@ -1100,6 +1102,7 @@ static void awf2_create_radiobuttons (GtkWidget *root) {
 
 	radiobutton3 = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON (radio2), "Radio button 3");
 	#if GTK_CHECK_VERSION (3,98,0)
+		gtk_check_button_set_inconsistent (GTK_CHECK_BUTTON (radiobutton3), TRUE);
 	#else
 		gtk_toggle_button_set_inconsistent (GTK_TOGGLE_BUTTON (radiobutton3), TRUE);
 	#endif
@@ -1113,6 +1116,7 @@ static void awf2_create_radiobuttons (GtkWidget *root) {
 
 	radiobutton6 = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON (radio4), "Radio button 6");
 	#if GTK_CHECK_VERSION (3,98,0)
+		gtk_check_button_set_inconsistent (GTK_CHECK_BUTTON (radiobutton6), TRUE);
 	#else
 		gtk_toggle_button_set_inconsistent (GTK_TOGGLE_BUTTON (radiobutton6), TRUE);
 	#endif
