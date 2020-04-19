@@ -118,7 +118,7 @@ static gboolean awf2_take_screenshot ();
 // widgets
 static void awf2_create_window (gpointer app, gchar *theme);
 static void awf2_boxpack (GtkBox *box, GtkWidget *widget, gboolean fill, gboolean expand, guint padding, guint spacing);
-static void awf2_create_menubar (GtkWidget *menubar);
+static void awf2_create_menubar (GtkWidget *root);
 static void awf2_create_toolbar (GtkWidget *root);
 static void awf2_create_combos_entries (GtkWidget *root);
 static void awf2_create_spinbuttons (GtkWidget *root);
@@ -757,7 +757,7 @@ static void awf2_boxpack (GtkBox *box, GtkWidget *widget, gboolean fill, gboolea
 	#endif
 }
 
-static void awf2_create_menubar (GtkWidget *menubar) {
+static void awf2_create_menubar (GtkWidget *root) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkMenu.html
 	// https://developer.gnome.org/gtk3/stable/GtkMenuItem.html
@@ -766,7 +766,7 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 	GtkWidget *menu, *submenu, *menuitem;
 	GSList *iterator, *group = NULL;
 
-	menu = awf2_new_menu (menubar, _("_System theme"));
+	menu = awf2_new_menu (root, _("_System theme"));
 	for (iterator = list_system_theme; iterator; iterator = iterator->next) {
 		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
 		#if !GTK_CHECK_VERSION (3,98,0)
@@ -782,7 +782,7 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 	if (!list_system_theme)
 		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
 
-	menu = awf2_new_menu (menubar, _("_User theme"));
+	menu = awf2_new_menu (root, _("_User theme"));
 	for (iterator = list_user_theme; iterator; iterator = iterator->next) {
 		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
 		#if !GTK_CHECK_VERSION (3,98,0)
@@ -798,7 +798,7 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 	if (!list_user_theme)
 		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
 
-	menu = awf2_new_menu (menubar, _("_Options"));
+	menu = awf2_new_menu (root, _("_Options"));
 		awf2_new_menu_tearoff (menu);
 
 		menuitem = awf2_new_menu_item (menu, "", "<Control>o", "gtk-open", FALSE);
