@@ -12,6 +12,8 @@ It require *GTK 2.24+* or *GTK 3.0+ (including 3.24)* or *GTK 4.0+ (3.98+)*, and
 
 * From source: `apt install dh-autoreconf libgtk2.0-dev libgtk-3-dev libgtk-4-dev` then: `./build.sh`
 
+The *build.sh* script will compile the program with all major GTK version available.
+
 ## Screenshots
 
 * The options menu allow to run some standard dialogs.
