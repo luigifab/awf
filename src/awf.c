@@ -101,6 +101,7 @@ static GtkWidget *progressbar1, *progressbar2, *progressbar3, *progressbar4;
 static GtkWidget *levelbar1, *levelbar2, *levelbar3, *levelbar4, *levelbar5, *levelbar6, *levelbar7, *levelbar8;
 static GtkWidget *notebook1, *notebook2, *notebook3, *notebook4;
 static gchar *screenshot;
+static gboolean startspinner = TRUE;
 
 // local functions
 
@@ -176,7 +177,7 @@ int main (int argc, char **argv) {
 	g_slist_foreach (list_user_theme, awf_exclude_theme, NULL);
 
 	// init
-	while ((opt = getopt (argc, argv, "vs:t:lh")) != -1) {
+	while ((opt = getopt (argc, argv, "vs:nt:lh")) != -1) {
 		switch (opt) {
 			case 'v':
 				g_printf ("%s\n", VERSION);
@@ -184,6 +185,8 @@ int main (int argc, char **argv) {
 			case 's':
 				screenshot = optarg;
 				break;
+			case 'n':
+				startspinner = FALSE;
 			case 't':
 				if (g_slist_find_custom (list_system_theme, optarg, &awf_compare_theme) ||
 					g_slist_find_custom (list_user_theme, optarg, &awf_compare_theme))
@@ -213,6 +216,7 @@ int main (int argc, char **argv) {
 				g_printf ("Usage: awf-gtk2 (for gtk 2.24+) or awf-gtk3 (for gtk 3.0+) or awf-gtk4 (for gtk 3.98+)\n");
 				g_printf (" %s %s\n", "-v", "Show version number (and quit)");
 				g_printf (" %s %s\n", "-l", "List available themes (and quit)");
+				g_printf (" %s %s\n", "-n", "Don't start spinners (for performance)");
 				g_printf (" %s %s\n", "-t <theme>   ", "Run with the specified theme");
 				g_printf (" %s %s\n", "-s <filename>", "Run and take/save a png screenshot on sighup");
 				g_printf ("\n");
@@ -1528,13 +1532,15 @@ static void awf2_create_spinners (GtkWidget *root) {
 	spinner1 = gtk_spinner_new ();
 	gtk_widget_set_size_request (spinner1, 20, 20);
 	gtk_widget_set_tooltip_text (spinner1, "spinner");
-	gtk_spinner_start (GTK_SPINNER (spinner1));
+	if (startspinner)
+		gtk_spinner_start (GTK_SPINNER (spinner1));
 
 	spinner2 = gtk_spinner_new ();
 	gtk_widget_set_size_request (spinner2, 20, 20);
 	gtk_widget_set_tooltip_text (spinner2, "spinner");
 	gtk_widget_set_sensitive (spinner2, FALSE);
-	gtk_spinner_start (GTK_SPINNER (spinner2));
+	if (startspinner)
+		gtk_spinner_start (GTK_SPINNER (spinner2));
 
 	awf2_boxpack (GTK_BOX (root), spinner1, FALSE, FALSE, 0, 0);
 	awf2_boxpack (GTK_BOX (root), BOXH, TRUE, TRUE, 0, 0); // empty space
