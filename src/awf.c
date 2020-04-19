@@ -96,6 +96,7 @@ static GSList *list_system_theme;
 static GSList *list_user_theme;
 static GtkWidget *window, *statusbar;
 static GtkWidget *spinbutton1, *spinbutton2;
+static GtkWidget *spinner1, *spinner2;
 static GtkWidget *scale1, *scale2, *scale3, *scale4, *scale5, *scale6;
 static GtkWidget *progressbar1, *progressbar2, *progressbar3, *progressbar4;
 static GtkWidget *levelbar1, *levelbar2, *levelbar3, *levelbar4, *levelbar5, *levelbar6, *levelbar7, *levelbar8;
@@ -497,25 +498,37 @@ static void awf2_update_widgets (GtkWidget *widget) {
 
 static gboolean awf2_take_screenshot () {
 
-	#if GTK_CHECK_VERSION (3,98,0)
-		GdkSurface *root;
-	#else
-		GdkWindow *root;
-	#endif
+	// https://developer.gnome.org/gdk2/stable/gdk2-Pixbufs.html
+	// https://developer.gnome.org/gdk3/stable/gdk3-Pixbufs.html
+	// https://developer.gnome.org/gdk4/stable/gdk4-Pixbufs.html
+	// https://developer.gnome.org/gdk4/stable/gdk4-Cairo-Interaction.html
+
 	GdkPixbuf *image;
 	gint width, height;
 
+	if (startspinner) {
+		// to avoid src/cairo-surface.c:1734: cairo_surface_mark_dirty_rectangle: assertion ! _cairo_surface_has_mime_data (surface) failed
+		gtk_spinner_stop (GTK_SPINNER (spinner1));
+		gtk_spinner_stop (GTK_SPINNER (spinner2));
+	}
+
 	#if GTK_CHECK_VERSION (3,98,0)
-		root = gtk_native_get_surface (GTK_NATIVE (window));
+		GdkSurface *root;
+		cairo_surface_t *cairo;
+		root   = gtk_native_get_surface (GTK_NATIVE (window));
 		width  = gdk_surface_get_width (root);
 		height = gdk_surface_get_height (root);
-		//image = gdk_pixbuf_get_from_window (root, 0, 0, width, height);
+		cairo  = gdk_surface_create_similar_surface (root, CAIRO_CONTENT_COLOR, width, height);
+		image  = gdk_pixbuf_get_from_surface (cairo, 0, 0, width, height);
+		cairo_surface_destroy (cairo);
 	#elif GTK_CHECK_VERSION (3,0,0)
-		root = gtk_widget_get_window (GTK_WIDGET (window));
+		GdkWindow *root;
+		root  = gtk_widget_get_window (GTK_WIDGET (window));
 		gtk_window_get_size (GTK_WINDOW (window), &width, &height);
 		image = gdk_pixbuf_get_from_window (root, 0, 0, width, height);
 	#else
-		root = gtk_widget_get_window (GTK_WIDGET (window));
+		GdkWindow *root;
+		root  = gtk_widget_get_window (GTK_WIDGET (window));
 		gtk_window_get_size (GTK_WINDOW (window), &width, &height);
 		image = gdk_pixbuf_get_from_drawable (NULL, root, gdk_colormap_get_system (), 0, 0, 0, 0, width, height);
 	#endif
@@ -523,6 +536,12 @@ static gboolean awf2_take_screenshot () {
 	if (image) {
  		gdk_pixbuf_save (image, screenshot, "png", NULL, "compression", "9", NULL);
 		awf2_update_statusbar (g_strdup_printf (_("Theme reloaded, then screenshot saved (%s) at"), screenshot), TRUE);
+		g_object_unref (image);
+	}
+
+	if (startspinner) {
+		gtk_spinner_start (GTK_SPINNER (spinner1));
+		gtk_spinner_start (GTK_SPINNER (spinner2));
 	}
 
 	return FALSE;
@@ -1532,8 +1551,6 @@ static void awf2_create_labels (GtkWidget *root) {
 static void awf2_create_spinners (GtkWidget *root) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkSpinner.html
-
-	GtkWidget *spinner1, *spinner2;
 
 	spinner1 = gtk_spinner_new ();
 	gtk_widget_set_size_request (spinner1, 20, 20);
