@@ -220,6 +220,11 @@ int main (int argc, char **argv) {
 				g_printf (" %s %s\n", "-n", "Don't start spinners (for performance)");
 				g_printf (" %s %s\n", "-t <theme>   ", "Run with the specified theme");
 				g_printf (" %s %s\n", "-s <filename>", "Run and take/save a png screenshot on sighup");
+				g_printf ("               with gtk3 if you are getting something like this:\n");
+				g_printf ("                src/cairo-surface.c cairo_surface_mark_dirty_rectangle\n");
+				g_printf ("                assertion ! _cairo_surface_has_mime_data (surface) failed\n");
+				g_printf ("               run also with -n\n");
+
 				g_printf ("\n");
 				return 0;
 		}
