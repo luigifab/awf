@@ -244,7 +244,7 @@ int main (int argc, char **argv) {
 		GtkApplication *app;
 		app = gtk_application_new ("org.gtk.awf", G_APPLICATION_FLAGS_NONE);
 		g_signal_connect (app, "activate", G_CALLBACK (awf2_create_window), theme);
-		status = g_application_run (G_APPLICATION (app), argc, argv);
+		status = g_application_run (G_APPLICATION (app), 0, NULL);
 		g_object_unref (app);
 	#else
 		gtk_init (&argc, &argv);
