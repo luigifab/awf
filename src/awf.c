@@ -779,6 +779,9 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 		#endif
 	}
 
+	if (!list_system_theme)
+		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
+
 	menu = awf2_new_menu (menubar, _("_User theme"));
 	for (iterator = list_user_theme; iterator; iterator = iterator->next) {
 		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
@@ -791,6 +794,9 @@ static void awf2_create_menubar (GtkWidget *menubar) {
 				gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
 		#endif
 	}
+
+	if (!list_user_theme)
+		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
 
 	menu = awf2_new_menu (menubar, _("_Options"));
 		awf2_new_menu_tearoff (menu);
