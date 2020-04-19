@@ -505,30 +505,26 @@ static gboolean awf2_take_screenshot () {
 
 	GdkPixbuf *image;
 	gint width, height;
-
-	if (startspinner) {
-		// to avoid src/cairo-surface.c:1734: cairo_surface_mark_dirty_rectangle: assertion ! _cairo_surface_has_mime_data (surface) failed
-		gtk_spinner_stop (GTK_SPINNER (spinner1));
-		gtk_spinner_stop (GTK_SPINNER (spinner2));
-	}
+	// src/cairo-surface.c:1734: cairo_surface_mark_dirty_rectangle: assertion ! _cairo_surface_has_mime_data (surface) failed
 
 	#if GTK_CHECK_VERSION (3,98,0)
 		GdkSurface *root;
-		cairo_surface_t *cairo;
-		root   = gtk_native_get_surface (GTK_NATIVE (window));
+		cairo_surface_t *cairo_st;
+		root   = gtk_native_get_surface (gtk_widget_get_native (window));
 		width  = gdk_surface_get_width (root);
 		height = gdk_surface_get_height (root);
-		cairo  = gdk_surface_create_similar_surface (root, CAIRO_CONTENT_COLOR, width, height);
-		image  = gdk_pixbuf_get_from_surface (cairo, 0, 0, width, height);
-		cairo_surface_destroy (cairo);
+		cairo_st = gdk_surface_create_similar_surface (root, CAIRO_CONTENT_COLOR, width, height);
+		image    = gdk_pixbuf_get_from_surface (cairo_st, 0, 0, width, height);
+		//cairo_surface_destroy (cairo_st);
+		//cairo_destroy (cr);
 	#elif GTK_CHECK_VERSION (3,0,0)
 		GdkWindow *root;
-		root  = gtk_widget_get_window (GTK_WIDGET (window));
+		root  = gtk_widget_get_window (window);
 		gtk_window_get_size (GTK_WINDOW (window), &width, &height);
 		image = gdk_pixbuf_get_from_window (root, 0, 0, width, height);
 	#else
 		GdkWindow *root;
-		root  = gtk_widget_get_window (GTK_WIDGET (window));
+		root  = gtk_widget_get_window (window);
 		gtk_window_get_size (GTK_WINDOW (window), &width, &height);
 		image = gdk_pixbuf_get_from_drawable (NULL, root, gdk_colormap_get_system (), 0, 0, 0, 0, width, height);
 	#endif
@@ -537,11 +533,6 @@ static gboolean awf2_take_screenshot () {
  		gdk_pixbuf_save (image, screenshot, "png", NULL, "compression", "9", NULL);
 		awf2_update_statusbar (g_strdup_printf (_("Theme reloaded, then screenshot saved (%s) at"), screenshot), TRUE);
 		g_object_unref (image);
-	}
-
-	if (startspinner) {
-		gtk_spinner_start (GTK_SPINNER (spinner1));
-		gtk_spinner_start (GTK_SPINNER (spinner2));
 	}
 
 	return FALSE;
