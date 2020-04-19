@@ -1633,20 +1633,22 @@ static void awf2_create_notebooks (GtkWidget *lroot, GtkWidget *rroot) {
 	notebook4 = gtk_notebook_new ();
 
 	#if GTK_CHECK_VERSION (3,98,0)
-		GtkEventController *event1, *event2, *event3, *event4;
-		event1 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
-		g_signal_connect (event1, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook1);
-		gtk_widget_add_controller (notebook1, event1);
-		event2 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
-		g_signal_connect (event2, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook2);
-		gtk_widget_add_controller (notebook2, event2);
-		event3 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
-		g_signal_connect (event3, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook3);
-		gtk_widget_add_controller (notebook3, event3);
-		event4 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
-		g_signal_connect (event4, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook4);
-		gtk_widget_add_controller (notebook4, event4);
+	// this does not work, because scroll is possible from content
+	//	GtkEventController *event1, *event2, *event3, *event4;
+	//	event1 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
+	//	g_signal_connect (event1, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook1);
+	//	gtk_widget_add_controller (notebook1, event1);
+	//	event2 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	//	g_signal_connect (event2, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook2);
+	//	gtk_widget_add_controller (notebook2, event2);
+	//	event3 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	//	g_signal_connect (event3, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook3);
+	//	gtk_widget_add_controller (notebook3, event3);
+	//	event4 = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES);
+	//	g_signal_connect (event4, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook4);
+	//	gtk_widget_add_controller (notebook4, event4);
 	//elif GTK_CHECK_VERSION (3,24,0)
+	// this works but there is a delay (first scroll is ignored)
 	//	GtkEventController *event1, *event2, *event3, *event4;
 	//	event1 = gtk_event_controller_scroll_new (notebook1, GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
 	//	g_signal_connect (event1, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook1);
@@ -1717,6 +1719,14 @@ static void awf2_create_notebook_tab (GtkWidget *notebook, gchar *text) {
 
 	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), content, head);
 	gtk_notebook_set_tab_reorderable (GTK_NOTEBOOK (notebook), content, TRUE);
+
+	#if GTK_CHECK_VERSION (3,98,0)
+	// this works but there is a delay (first scroll is ignored)
+		GtkEventController *event;
+		event = gtk_event_controller_scroll_new (GTK_EVENT_CONTROLLER_SCROLL_BOTH_AXES | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
+		g_signal_connect (event, "scroll", G_CALLBACK (awf2_evtscroll_notebook_tabs), notebook);
+		gtk_widget_add_controller (gtk_widget_get_parent (head), event);
+	#endif
 }
 
 static void awf2_create_treview (GtkWidget *root) {
@@ -2096,7 +2106,7 @@ static void awf2_evtscroll_notebook_tabs (GtkEventControllerScroll *event, gdoub
 	GtkNotebook *notebook;
 	GtkWidget *child, *event_widget, *action_widget;
 
-	g_printf ("go\n");
+	//g_printf ("go\n");
 	while (!GTK_IS_NOTEBOOK (widget))
 		widget = gtk_widget_get_parent (widget);
 
