@@ -950,14 +950,14 @@ static void awf2_create_toolbar (GtkWidget *root) {
 		gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (icon4), "gtk-refresh");
 		g_signal_connect (G_OBJECT (icon4), "clicked", G_CALLBACK (awf_refresh_theme), NULL);
 
-		#if GTK_CHECK_VERSION (3,10,0)
+		#if GTK_CHECK_VERSION (3,14,0)
 			icon5 = GTK_WIDGET (gtk_tool_button_new (NULL, NULL));
 			gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (icon5), "gtk-goto-first");
 		#else
 			icon5 = GTK_WIDGET (gtk_tool_button_new_from_stock ("gtk-goto-first"));
 		#endif
 
-		#if GTK_CHECK_VERSION (3,10,0)
+		#if GTK_CHECK_VERSION (3,14,0)
 			icon6 = GTK_WIDGET (gtk_tool_button_new (NULL, NULL));
 			gtk_tool_button_set_icon_name (GTK_TOOL_BUTTON (icon6), "gtk-goto-last");
 			gtk_widget_set_sensitive (icon6, FALSE);
