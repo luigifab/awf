@@ -29,17 +29,18 @@
  *  msgfmt src/fr/awf.po -o src/fr/LC_MESSAGES/awf.mo
  *
  * GTK versions tested:
- *  Ubuntu 11.04 (live) GTK 3.0  + GTK 2.24 + GLIB 2.28
- *  Ubuntu 11.10 (live) GTK 3.2  + GTK 2.24 + GLIB 2.30
- *  Ubuntu 12.04 (live) GTK 3.4  + GTK 2.24 + GLIB 2.32
- *  Ubuntu 13.04 (live) GTK 3.6  + GTK 2.24 + GLIB 2.36
- *  Ubuntu 13.10 (live) GTK 3.8  + GTK 2.24 + GLIB 2.38
- *  Ubuntu 14.04 (live) GTK 3.10
- *  Ubuntu 14.10 (live) GTK 3.12
- *  Ubuntu 15.04 (live) GTK 3.14
- *  Ubuntu 15.10 (live) GTK 3.16
- *  Ubuntu 16.04 (live) GTK 3.18
- *  Ubuntu 16.10 (live) GTK 3.20
+ *  Ubuntu 11.04 (live/768  MB) GTK 3.0  + GTK 2.24 + GLIB 2.28
+ *  Ubuntu 11.10 (live/768  MB) GTK 3.2  + GTK 2.24 + GLIB 2.30
+ *  Ubuntu 12.04 (live/1024 MB) GTK 3.4  + GTK 2.24 + GLIB 2.32
+ *  Ubuntu 13.04 (live/1024 MB) GTK 3.6  + GTK 2.24 + GLIB 2.36
+ *  Ubuntu 13.10 (live/1024 MB) GTK 3.8  + GTK 2.24 + GLIB 2.38
+ *  Ubuntu 14.04 (live/1024 MB) GTK 3.10
+ *  Ubuntu 14.10 (live/1024 MB) GTK 3.12
+ *  Ubuntu 15.04 (live/1024 MB) GTK 3.14
+ *  Ubuntu 15.10 (live/1024 MB) GTK 3.16
+ *  Ubuntu 16.04 (live/1272 MB) GTK 3.18
+ *  Ubuntu 16.10 (live/1272 MB) GTK 3.20
+ *  Ubuntu 17.04 (live/1272 MB) GTK 3.22
  *  Debian Testing      GTK 3.24 + GTK 3.98 + GTK 2.24 + GLIB 2.64
  */
 
@@ -974,6 +975,7 @@ static void awf2_create_combos_entries (GtkWidget *root) {
 	// https://developer.gnome.org/gtk3/stable/GtkComboBoxText.html
 	// https://developer.gnome.org/gtk3/stable/GtkComboBox.html
 	// https://developer.gnome.org/gtk3/stable/GtkEntry.html
+	// https://developer.gnome.org/gtk4/stable/GtkEditable.html
 
 	GtkWidget *combo1, *combo2, *combo3, *combo4, *entry1, *entry2, *entry3, *entry4;
 
@@ -1000,29 +1002,41 @@ static void awf2_create_combos_entries (GtkWidget *root) {
 	gtk_widget_set_sensitive (combo4, FALSE);
 
 	entry1 = gtk_entry_new ();
-	#if !GTK_CHECK_VERSION (3,98,0)
+	#if GTK_CHECK_VERSION (3,98,0)
+		gtk_editable_set_text (GTK_EDITABLE (entry1), "Entry");
+	#else
 		gtk_entry_set_text (GTK_ENTRY (entry1), "Entry");
 	#endif
 
 	entry2 = gtk_entry_new ();
-	#if !GTK_CHECK_VERSION (3,98,0)
+	#if GTK_CHECK_VERSION (3,98,0)
+		gtk_editable_set_text (GTK_EDITABLE (entry2), "Entry (disabled)");
+	#else
 		gtk_entry_set_text (GTK_ENTRY (entry2), "Entry (disabled)");
 	#endif
 	gtk_widget_set_sensitive (entry2, FALSE);
 
 	entry3 = gtk_entry_new ();
-	#if !GTK_CHECK_VERSION (3,98,0)
+	#if GTK_CHECK_VERSION (3,98,0)
+		gtk_editable_set_text (GTK_EDITABLE (entry3), "Entry");
+	#else
 		gtk_entry_set_text (GTK_ENTRY (entry3), "Entry");
 	#endif
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry3), GTK_ENTRY_ICON_PRIMARY, "gtk-clear");
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry3), GTK_ENTRY_ICON_SECONDARY, "gtk-find");
+	gtk_entry_set_icon_tooltip_text (GTK_ENTRY (entry3), GTK_ENTRY_ICON_PRIMARY, "gtk-clear");
+	gtk_entry_set_icon_tooltip_text (GTK_ENTRY (entry3), GTK_ENTRY_ICON_SECONDARY, "gtk-find");
 
 	entry4 = gtk_entry_new ();
-	#if !GTK_CHECK_VERSION (3,98,0)
+	#if GTK_CHECK_VERSION (3,98,0)
+		gtk_editable_set_text (GTK_EDITABLE (entry4), "Entry (disabled)");
+	#else
 		gtk_entry_set_text (GTK_ENTRY (entry4), "Entry (disabled)");
 	#endif
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry4), GTK_ENTRY_ICON_PRIMARY, "gtk-clear");
 	gtk_entry_set_icon_from_icon_name (GTK_ENTRY (entry4), GTK_ENTRY_ICON_SECONDARY, "gtk-find");
+	gtk_entry_set_icon_tooltip_text (GTK_ENTRY (entry4), GTK_ENTRY_ICON_PRIMARY, "gtk-clear");
+	gtk_entry_set_icon_tooltip_text (GTK_ENTRY (entry4), GTK_ENTRY_ICON_SECONDARY, "gtk-find");
 	gtk_widget_set_sensitive (entry4, FALSE);
 
 	#if GTK_CHECK_VERSION (3,2,0)
@@ -2074,10 +2088,6 @@ static void awf2_evtscroll_notebook_tabs (GtkEventControllerScroll *event, gdoub
 	GtkWidget *child, *event_widget, *action_widget;
 
 	g_printf ("go\n");
-	#if GTK_CHECK_VERSION (3,98,0)
-		//g_printf ("%s\n", gtk_widget_get_css_classes (widget));
-	#endif
-
 	while (!GTK_IS_NOTEBOOK (widget))
 		widget = gtk_widget_get_parent (widget);
 
