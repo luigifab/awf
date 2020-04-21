@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# remove old build
+rm -f awf-gtk2 awf-gtk3 awf-gtk4
+
 # copy to a tmp directory
 mkdir builder builder/src
 
