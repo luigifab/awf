@@ -418,7 +418,7 @@ static void awf_update_progressbars (GtkRange *range) {
 	#if !GTK_CHECK_VERSION (3,0,0)
 		if (gtk_progress_bar_get_text (GTK_PROGRESS_BAR (progressbar1))) {
 			gchar *progress_text;
-			progress_text = g_strdup_printf ("%i %%", value);
+			progress_text = g_strdup_printf ("%i %%", (int)value);
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar1), progress_text);
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar3), progress_text);
 			g_free (progress_text);
@@ -499,7 +499,7 @@ static void awf2_update_widgets (GtkWidget *widget) {
 			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar3), TRUE);
 		#else
 			gchar *progress_text;
-			progress_text = g_strdup_printf ("%i %%", gtk_range_get_value (GTK_RANGE (scale1)));
+			progress_text = g_strdup_printf ("%i %%", (int)gtk_range_get_value (GTK_RANGE (scale1)));
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar1), progress_text);
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar3), progress_text);
 			g_free (progress_text);
