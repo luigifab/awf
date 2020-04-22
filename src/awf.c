@@ -6,6 +6,7 @@
  *  Copyright 2011-2017 | Valère Monseur <valere~monseur~ymail~com>
  *  https://github.com/valr/awf
  *
+ * Forked from
  *  AWF is originally based on the code from The Widget Factory
  *  created by Richard Stellingwerff <remenic~gmail~com>
  *
@@ -64,6 +65,19 @@
 
 #if !defined (G_SOURCE_CONTINUE)
 	#define G_SOURCE_CONTINUE TRUE // glib >= 2.32
+#endif
+#if GTK_CHECK_VERSION (3,98,0)
+	#define TRUE_GTK_MAJOR_VERSION 4
+	#define gtk_major_version gtk_get_major_version ()
+	#define gtk_minor_version gtk_get_minor_version ()
+	#define gtk_micro_version gtk_get_micro_version ()
+#elif GTK_CHECK_VERSION (3,0,0)
+	#define TRUE_GTK_MAJOR_VERSION 3
+	#define gtk_major_version gtk_get_major_version ()
+	#define gtk_minor_version gtk_get_minor_version ()
+	#define gtk_micro_version gtk_get_micro_version ()
+#else
+	#define TRUE_GTK_MAJOR_VERSION 2
 #endif
 #if GTK_CHECK_VERSION (3,2,0)
 	#define BOXH (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0))
@@ -166,7 +180,7 @@ int main (int argc, char **argv) {
 	gchar *directory, *theme = "auto";
 	GSList *iterator;
 
-	// load themes
+	// load available themes
 	list_system_theme = awf_load_theme ("/usr/share/themes");
 	list_system_theme = g_slist_sort (list_system_theme, (GCompareFunc)awf_compare_theme);
 
@@ -177,12 +191,23 @@ int main (int argc, char **argv) {
 
 	g_slist_foreach (list_user_theme, awf_exclude_theme, NULL);
 
+	// locale
+	setlocale (LC_ALL, "");
+	if (g_file_test ("/usr/share/locale", G_FILE_TEST_IS_DIR))
+		bindtextdomain (GETTEXT_PACKAGE, "/usr/share/locale");
+	if (g_file_test ("/var/www/awf/src", G_FILE_TEST_IS_DIR))
+		bindtextdomain (GETTEXT_PACKAGE, "/var/www/awf/src");
+	if (g_file_test ("/home/fabrice/awf/src", G_FILE_TEST_IS_DIR))
+		bindtextdomain (GETTEXT_PACKAGE, "/home/fabrice/awf/src");
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	textdomain (GETTEXT_PACKAGE);
+
 	// init
 	while ((opt = getopt (argc, argv, "vs:nt:lh")) != -1) {
 		switch (opt) {
 			case 'v':
 				g_printf ("%s\n", VERSION);
-				return 0;
+				return status;
 			case 's':
 				screenshot = optarg;
 				break;
@@ -199,58 +224,49 @@ int main (int argc, char **argv) {
 					g_printf (" %s\n", (gchar*)iterator->data);
 				for (iterator = list_user_theme; iterator; iterator = iterator->next)
 					g_printf (" %s\n", (gchar*)iterator->data);
-				return 0;
+				return status;
 			case 'h':
 			default:
-				g_printf ("\n");
-				g_printf ("A widget factory %s (theme is reloaded on sighup)\n", VERSION);
-				g_printf (" compiled with gtk %d.%d.%d and glib %d.%d.%d\n",
-					GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION,
-					GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION, GLIB_MICRO_VERSION);
-				g_printf ("  started with gtk %d.%d.%d and glib %d.%d.%d\n\n",
-					#if GTK_CHECK_VERSION (3,0,0)
-						gtk_get_major_version (), gtk_get_minor_version (), gtk_get_micro_version (),
-					#else
+				g_printf ("\n%s\n %s\n %s\n\n%s\n  %s %s\n  %s %s\n  %s %s\n%s\n  %s %s\n  %s %s\n  %s %s\n  %s %s\n  %s %s\n",
+					g_strdup_printf (_("A widget factory - GTK %d - %s"), TRUE_GTK_MAJOR_VERSION, VERSION),
+					g_strdup_printf (_("compiled with gtk %d.%d.%d and glib %d.%d.%d"),
+						GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION,
+						GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION, GLIB_MICRO_VERSION),
+					g_strdup_printf (_(" started with gtk %d.%d.%d and glib %d.%d.%d"),
 						gtk_major_version, gtk_minor_version, gtk_micro_version,
-					#endif
-					glib_major_version, glib_minor_version, glib_micro_version);
-				g_printf ("Usage: awf-gtk2 (for gtk 2.24+) or awf-gtk3 (for gtk 3.0+) or awf-gtk4 (for gtk 3.98+)\n");
-				g_printf (" %s %s\n", "-v", "Show version number (and quit)");
-				g_printf (" %s %s\n", "-l", "List available themes (and quit)");
-				g_printf (" %s %s\n", "-n", "Don't start spinners (for performance)");
-				g_printf (" %s %s\n", "-t <theme>   ", "Run with the specified theme");
-				g_printf (" %s %s\n", "-s <filename>", "Run and take/save a png screenshot on sighup");
-				g_printf ("               with gtk3 if you are getting something like this:\n");
-				g_printf ("                src/cairo-surface.c cairo_surface_mark_dirty_rectangle\n");
-				g_printf ("                assertion ! _cairo_surface_has_mime_data (surface) failed\n");
-				g_printf ("               run also with -n\n");
+						glib_major_version, glib_minor_version, glib_micro_version),
+					_("Usage:"),
+					"awf-gtk2[.sh] ", "(gtk 2.24+)",
+					"awf-gtk3[.sh] ", "(gtk 3.0+)",
+					"awf-gtk4[.sh] ", "(gtk 3.98+)",
+					_("Options:"),
+					"-v            ", _("Show version number (and quit)"),
+					"-l            ", _("List available themes (and quit)"),
+					"-n            ", _("Don't start spinners"),
+					"-t <theme>    ", _("Run with the specified theme"),
+					"-s <filename> ", _("Run and save a png screenshot on sighup")
+				);
 
-				g_printf ("\n");
-				return 0;
+				return status;
 		}
 	}
-
-	// locale
-	setlocale (LC_ALL, "");
-	if (g_file_test ("/usr/share/locale", G_FILE_TEST_IS_DIR))
-		bindtextdomain (GETTEXT_PACKAGE, "/usr/share/locale");
-	if (g_file_test ("/var/www/awf/src", G_FILE_TEST_IS_DIR))
-		bindtextdomain (GETTEXT_PACKAGE, "/var/www/awf/src");
-	if (g_file_test ("/home/gtk324/awf/src", G_FILE_TEST_IS_DIR))
-		bindtextdomain (GETTEXT_PACKAGE, "/home/gtk324/awf/src");
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-	textdomain (GETTEXT_PACKAGE);
 
 	// create and show window
 	#if GLIB_CHECK_VERSION (2,30,0)
 		g_unix_signal_add (SIGHUP, awf_sighup_handler, NULL); // glib >= 2.30
 	#endif
 
-	#if GTK_CHECK_VERSION (3,0,0)
+	#if GTK_CHECK_VERSION (3,98,0)
 		GtkApplication *app;
-		app = gtk_application_new ("org.gtk.awf", G_APPLICATION_FLAGS_NONE);
+		app = gtk_application_new ("org.gtk.awf4", G_APPLICATION_FLAGS_NONE);
 		g_signal_connect (app, "activate", G_CALLBACK (awf2_create_window), theme);
-		status = g_application_run (G_APPLICATION (app), 0, NULL);
+		status = g_application_run (G_APPLICATION (app), 0, NULL); // todo (app, argc, argv)
+		g_object_unref (app);
+	#elif GTK_CHECK_VERSION (3,0,0)
+		GtkApplication *app;
+		app = gtk_application_new ("org.gtk.awf3", G_APPLICATION_FLAGS_NONE);
+		g_signal_connect (app, "activate", G_CALLBACK (awf2_create_window), theme);
+		status = g_application_run (G_APPLICATION (app), 0, NULL); // todo (app, argc, argv)
 		g_object_unref (app);
 	#else
 		gtk_init (&argc, &argv);
@@ -278,7 +294,7 @@ static GSList* awf_load_theme (gchar *directory) {
 				gchar *theme_path = g_build_path ("/", directory, g_strstrip (theme), NULL);
 
 				if (g_file_test (theme_path, G_FILE_TEST_IS_DIR)) {
-					gchar *theme_subpath = g_build_path ("/", theme_path, g_strdup_printf ("gtk-%d.0", GTK_MAJOR_VERSION), NULL);
+					gchar *theme_subpath = g_build_path ("/", theme_path, g_strdup_printf ("gtk-%d.0", TRUE_GTK_MAJOR_VERSION), NULL);
 					if (g_file_test (theme_subpath, G_FILE_TEST_IS_DIR))
 						list = g_slist_prepend (list, theme);
 					g_free (theme_subpath);
@@ -402,7 +418,7 @@ static void awf_update_progressbars (GtkRange *range) {
 	#if !GTK_CHECK_VERSION (3,0,0)
 		if (gtk_progress_bar_get_text (GTK_PROGRESS_BAR (progressbar1))) {
 			gchar *progress_text;
-			progress_text = g_strdup_printf ("%i %%", (int)value);
+			progress_text = g_strdup_printf ("%i %%", value);
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar1), progress_text);
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar3), progress_text);
 			g_free (progress_text);
@@ -480,7 +496,7 @@ static void awf2_update_widgets (GtkWidget *widget) {
 			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar3), TRUE);
 		#else
 			gchar *progress_text;
-			progress_text = g_strdup_printf ("%i %%", (int)gtk_range_get_value (GTK_RANGE (scale1)));
+			progress_text = g_strdup_printf ("%i %%", gtk_range_get_value (GTK_RANGE (scale1)));
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar1), progress_text);
 			gtk_progress_bar_set_text (GTK_PROGRESS_BAR (progressbar3), progress_text);
 			g_free (progress_text);
@@ -568,6 +584,7 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 		g_signal_connect (G_OBJECT (window), "destroy", G_CALLBACK (gtk_main_quit), NULL);
 	#endif
 
+	gtk_window_set_title (GTK_WINDOW (window), g_strdup_printf (_("A widget factory - GTK %d - %s"), TRUE_GTK_MAJOR_VERSION, VERSION));
 	gtk_window_set_icon_name (GTK_WINDOW (window), "awf");
 
 	if (theme != "auto")
@@ -580,19 +597,23 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 	gtk_container_add (GTK_CONTAINER (window), vbox_window);
 
 		#if GTK_CHECK_VERSION (3,98,0)
-			menubar = BOXH;
-			gtk_widget_set_margin_top (menubar, 25);
-			awf2_boxpack (GTK_BOX (vbox_window), menubar, FALSE, FALSE, 0, 0);
+
+			GMenu *gmm, *gms;
+			gmm = g_menu_new ();
+				gms = g_menu_new ();
+				g_menu_append_submenu (gmm, _("_System theme"), G_MENU_MODEL (gms));
+				g_menu_append (gms, _("No theme found"), NULL);
+				gms = g_menu_new ();
+				g_menu_append_submenu (gmm, _("_User theme"), G_MENU_MODEL (gms));
+				g_menu_append (gms, _("No theme found"), NULL);
+				gms = g_menu_new ();
+				g_menu_append_submenu (gmm, _("_Options"), G_MENU_MODEL (gms));
+				g_menu_append (gms, _("gtk-open"), NULL);
+			gtk_application_set_menubar (app, G_MENU_MODEL (gmm));
 
 			toolbar = BOXH;
 			awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
 			awf2_create_toolbar (toolbar);
-		//#elif GTK_CHECK_VERSION (3,4,0)
-		//	gtk_application_set_menubar (app, NULL);
-		//
-		//	toolbar = gtk_toolbar_new ();
-		//	awf2_boxpack (GTK_BOX (vbox_window), toolbar, FALSE, FALSE, 0, 0);
-		//	awf2_create_toolbar (toolbar);
 		#else
 			menubar = gtk_menu_bar_new ();
 			awf2_create_menubar (menubar);
@@ -608,7 +629,7 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 
 	statusbar = gtk_statusbar_new ();
 	awf2_boxpack (GTK_BOX (vbox_window), statusbar, FALSE, FALSE, 0, 0);
-	awf2_update_statusbar (g_strdup_printf (_("AWF %s / Theme %s loaded."), VERSION, current_theme), FALSE);
+	awf2_update_statusbar (g_strdup_printf (_("Theme %s loaded."), current_theme), FALSE);
 
 	// columns layout
 	awf2_boxpack (GTK_BOX (widgets), hbox_columns, TRUE, TRUE, 0, 0);
@@ -718,20 +739,16 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 
 	// go
 	#if GTK_CHECK_VERSION (3,98,0)
-		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 4"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar-gtk4");
 		gtk_widget_show (window);
 	#elif GTK_CHECK_VERSION (3,4,0)
-		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 3"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar");
 		gtk_widget_show_all (window);
 	#elif GTK_CHECK_VERSION (3,0,0)
-		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 3"));
 		gtk_style_context_add_class (gtk_widget_get_style_context (toolbar), "primary-toolbar");
 		gtk_widget_show_all (window);
 		gtk_main ();
 	#else
-		gtk_window_set_title (GTK_WINDOW (window), _("A widget factory - GTK 2"));
 		gtk_widget_show_all (window);
 		gtk_main ();
 	#endif
@@ -1253,7 +1270,7 @@ static void awf2_create_otherbuttons (GtkWidget *root) {
 		gtk_widget_set_sensitive (button10, FALSE);
 	#endif
 
-	button11 = gtk_link_button_new_with_label ("https://github.com/luigifab/awf", _("Link button"));
+	button11 = gtk_link_button_new_with_label ("https://github.com/luigifab/awf", "Link button");
 
 	// https://developer.gnome.org/gtk3/stable/GtkScaleButton.html
 
@@ -1789,6 +1806,8 @@ static void awf2_create_treview (GtkWidget *root) {
 
 // menuitems
 
+#if !GTK_CHECK_VERSION (3,98,0)
+
 static GtkWidget* awf2_new_menu (GtkWidget *root, gchar *text) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkMenu.html
@@ -1796,12 +1815,10 @@ static GtkWidget* awf2_new_menu (GtkWidget *root, gchar *text) {
 
 	GtkWidget *menu, *menuitem;
 
-	#if !GTK_CHECK_VERSION (3,98,0)
-		menu = gtk_menu_new ();
-		menuitem = gtk_menu_item_new_with_mnemonic (text);
-		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem), menu);
-		gtk_menu_shell_append (GTK_MENU_SHELL (root), menuitem);
-	#endif
+	menu = gtk_menu_new ();
+	menuitem = gtk_menu_item_new_with_mnemonic (text);
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem), menu);
+	gtk_menu_shell_append (GTK_MENU_SHELL (root), menuitem);
 
 	return menu;
 }
@@ -1812,8 +1829,7 @@ static GtkWidget* awf2_new_menu_tearoff (GtkWidget *menu) {
 
 	GtkWidget *menuitem;
 
-	#if GTK_CHECK_VERSION (3,98,0)
-	#elif GTK_CHECK_VERSION (3,0,0)
+	#if GTK_CHECK_VERSION (3,0,0)
 		menuitem = gtk_tearoff_menu_item_new ();
 		gtk_style_context_add_class (gtk_widget_get_style_context (menuitem), "tearoff");
 		gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
@@ -1831,10 +1847,8 @@ static GtkWidget* awf2_new_menu_separator (GtkWidget *menu) {
 
 	GtkWidget *menuitem;
 
-	#if !GTK_CHECK_VERSION (3,98,0)
-		menuitem = gtk_separator_menu_item_new ();
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
-	#endif
+	menuitem = gtk_separator_menu_item_new ();
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
 	return menuitem;
 }
@@ -1845,13 +1859,11 @@ static GtkWidget* awf2_new_menu_check (GtkWidget *menu, gchar *text, gboolean ch
 
 	GtkWidget *menuitem;
 
-	#if !GTK_CHECK_VERSION (3,98,0)
-		menuitem = gtk_check_menu_item_new_with_mnemonic (text);
-		gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), checked);
-		gtk_check_menu_item_set_inconsistent (GTK_CHECK_MENU_ITEM (menuitem), inconsistent);
-		gtk_widget_set_sensitive (menuitem, !disabled);
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
-	#endif
+	menuitem = gtk_check_menu_item_new_with_mnemonic (text);
+	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), checked);
+	gtk_check_menu_item_set_inconsistent (GTK_CHECK_MENU_ITEM (menuitem), inconsistent);
+	gtk_widget_set_sensitive (menuitem, !disabled);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
 	return menuitem;
 }
@@ -1862,13 +1874,11 @@ static GtkWidget* awf2_new_menu_radio (GtkWidget *menu, gchar *text, gboolean ch
 
 	GtkWidget *menuitem;
 
-	#if !GTK_CHECK_VERSION (3,98,0)
-		menuitem = gtk_radio_menu_item_new_with_mnemonic (group, text);
-		gtk_check_menu_item_set_inconsistent (GTK_CHECK_MENU_ITEM (menuitem), inconsistent);
-		gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), checked);
-		gtk_widget_set_sensitive (menuitem, !disabled);
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
-	#endif
+	menuitem = gtk_radio_menu_item_new_with_mnemonic (group, text);
+	gtk_check_menu_item_set_inconsistent (GTK_CHECK_MENU_ITEM (menuitem), inconsistent);
+	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), checked);
+	gtk_widget_set_sensitive (menuitem, !disabled);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
 	return menuitem;
 }
@@ -1882,22 +1892,22 @@ static GtkWidget* awf2_new_menu_item (GtkWidget *menu, gchar *text, gchar *accel
 	GdkModifierType accelerator_mods;
 	guint accelerator_key;
 
-	#if !GTK_CHECK_VERSION (3,98,0)
-		if (strlen (image) > 0)
-			menuitem = gtk_image_menu_item_new_from_stock (image, NULL);
-		else
-			menuitem = gtk_menu_item_new_with_mnemonic (text);
+	if (strlen (image) > 0)
+		menuitem = gtk_image_menu_item_new_from_stock (image, NULL);
+	else
+		menuitem = gtk_menu_item_new_with_mnemonic (text);
 
-		gtk_widget_set_sensitive (menuitem, !disabled);
-		gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
+	gtk_widget_set_sensitive (menuitem, !disabled);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menuitem);
 
-		//gtk_accelerator_parse (accel, &accelerator_key, &accelerator_mods);
-		//if (accelerator_key && accelerator_mods)
-		//	gtk_widget_add_accelerator (menuitem, "activate", , accelerator_key, accelerator_mods, GTK_ACCEL_VISIBLE);
-	#endif
+	//gtk_accelerator_parse (accel, &accelerator_key, &accelerator_mods);
+	//if (accelerator_key && accelerator_mods)
+	//	gtk_widget_add_accelerator (menuitem, "activate", , accelerator_key, accelerator_mods, GTK_ACCEL_VISIBLE);
 
 	return menuitem;
 }
+
+#endif
 
 // dialogs
 
@@ -2023,17 +2033,13 @@ static void awf2_show_dialog_about (GtkWidget *widget) {
 
 	gtk_show_about_dialog (GTK_WINDOW (window),
 		"version", VERSION,
-		"comments", g_strdup_printf ("%s\n\n%s%s",
+		"comments", g_strdup_printf ("%s\n\n%s\n%s",
 			_("A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."),
-			g_strdup_printf (" compiled with gtk %d.%d.%d and glib %d.%d.%d\n",
+			g_strdup_printf (_("compiled with gtk %d.%d.%d and glib %d.%d.%d"),
 				GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION,
 				GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION, GLIB_MICRO_VERSION),
-			g_strdup_printf ("  started with gtk %d.%d.%d and glib %d.%d.%d",
-				#if GTK_CHECK_VERSION (3,0,0)
-					gtk_get_major_version (), gtk_get_minor_version (), gtk_get_micro_version (),
-				#else
-					gtk_major_version, gtk_minor_version, gtk_micro_version,
-				#endif
+			g_strdup_printf (_(" started with gtk %d.%d.%d and glib %d.%d.%d"),
+				gtk_major_version, gtk_minor_version, gtk_micro_version,
 				glib_major_version, glib_minor_version, glib_micro_version)),
 		"website", "https://github.com/luigifab/awf",
 		"copyright", "Copyright © 2011-2017 Valère Monseur\nCopyright © 2020 Fabrice Creuzot",
