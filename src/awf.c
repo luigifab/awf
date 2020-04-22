@@ -489,9 +489,12 @@ static void awf2_update_widgets (GtkWidget *widget) {
 		gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook3), TRUE);
 		gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook4), TRUE);
 
-		#if GTK_CHECK_VERSION (3,0,0)
+		#if GTK_CHECK_VERSION (3,6,0)
 			gtk_orientable_set_orientation (GTK_ORIENTABLE (spinbutton1), GTK_ORIENTATION_VERTICAL);
 			gtk_orientable_set_orientation (GTK_ORIENTABLE (spinbutton2), GTK_ORIENTATION_VERTICAL);
+			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar1), TRUE);
+			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar3), TRUE);
+		#elif GTK_CHECK_VERSION (3,0,0)
 			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar1), TRUE);
 			gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progressbar3), TRUE);
 		#else
