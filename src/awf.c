@@ -401,6 +401,7 @@ static void awf_update_progressbars (GtkRange *range) {
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar5), value / 100.0);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar6), value / 100.0);
 		// range (0..5)
+		// GTK 3.20.9 gtk_level_bar_set_value do nothing
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar3), value / 100.0 * gtk_level_bar_get_max_value (GTK_LEVEL_BAR (levelbar3)));
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar4), value / 100.0 * gtk_level_bar_get_max_value (GTK_LEVEL_BAR (levelbar4)));
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar7), value / 100.0 * gtk_level_bar_get_max_value (GTK_LEVEL_BAR (levelbar7)));
@@ -1477,11 +1478,13 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		#endif
 		gtk_widget_set_tooltip_text (levelbar2, "level bar");
 
+		// GTK 3.20.9 gtk_level_bar_set_value do nothing
 		levelbar3 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar3), GTK_LEVEL_BAR_MODE_DISCRETE);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar3), 2);
 		gtk_widget_set_tooltip_text (levelbar3, "level bar");
 
+		// GTK 3.20.9 gtk_level_bar_set_value do nothing
 		levelbar4 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar4), GTK_LEVEL_BAR_MODE_DISCRETE);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar4), 2);
@@ -1505,12 +1508,14 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (levelbar6), GTK_ORIENTATION_VERTICAL);
 		gtk_widget_set_tooltip_text (levelbar6, "level bar");
 
+		// GTK 3.20.9 gtk_level_bar_set_value do nothing
 		levelbar7 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar7), GTK_LEVEL_BAR_MODE_DISCRETE);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar7), 2);
 		gtk_orientable_set_orientation (GTK_ORIENTABLE (levelbar7), GTK_ORIENTATION_VERTICAL);
 		gtk_widget_set_tooltip_text (levelbar7, "level bar");
 
+		// GTK 3.20.9 gtk_level_bar_set_value do nothing
 		levelbar8 = gtk_level_bar_new_for_interval (0, 5);
 		gtk_level_bar_set_mode (GTK_LEVEL_BAR (levelbar8), GTK_LEVEL_BAR_MODE_DISCRETE);
 		gtk_level_bar_set_value (GTK_LEVEL_BAR (levelbar8), 2);
