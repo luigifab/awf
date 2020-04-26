@@ -93,7 +93,7 @@
 
 // global local variables
 
-static gchar *current_theme;
+static gchar *current_theme = "";
 static GSList *list_system_theme;
 static GSList *list_user_theme;
 static GtkWidget *window, *statusbar;
@@ -104,6 +104,7 @@ static GtkWidget *levelbar1, *levelbar2, *levelbar3, *levelbar4, *levelbar5, *le
 static GtkWidget *notebook1, *notebook2, *notebook3, *notebook4;
 static gchar *opt_screenshot;
 static gboolean opt_startspinner = TRUE;
+static gboolean allow_update_theme = TRUE;
 
 // local functions
 
@@ -327,10 +328,12 @@ static gint awf_compare_theme (gconstpointer theme1, gconstpointer theme2) {
 
 static void awf2_set_theme (gchar *new_theme) {
 
-g_printf ("%s\n", new_theme);
+	// we must ignore the activate signal when menubar is created
+	if (!allow_update_theme)
+		return;
+
 	if (new_theme == "refresh") {
 
-		// refresh theme
 		gchar *default_theme = NULL;
 		if (g_slist_find_custom (list_system_theme, "Default", &awf_compare_theme))
 			default_theme = "Default";
@@ -349,19 +352,18 @@ g_printf ("%s\n", new_theme);
 				g_timeout_add_seconds (1, awf2_take_screenshot, NULL);
 		}
 	}
-	else {
-		// set theme
-		if (new_theme != "auto")
-			g_object_set (gtk_settings_get_default (), "gtk-theme-name", new_theme,  NULL);
+	else if (new_theme == "auto") {
+		g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
+	}
+	else if ((strcmp ((gchar*)current_theme, (gchar*)new_theme) != 0)) {
 
-		// memorize current theme
+		//g_printf ("awf2_set_theme: from %s to %s\n", current_theme, new_theme);
+
+		g_object_set (gtk_settings_get_default (), "gtk-theme-name", new_theme,  NULL);
 		g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
 
-		// resize window
-		if (window && statusbar) {
-			gtk_window_resize (GTK_WINDOW (window), 50, 50);
-			awf2_update_statusbar (g_strdup_printf (_("Theme %s loaded."), current_theme), FALSE);
-		}
+		gtk_window_resize (GTK_WINDOW (window), 50, 50);
+		awf2_update_statusbar (g_strdup_printf (_("Theme %s loaded."), current_theme), FALSE);
 	}
 }
 
@@ -588,6 +590,7 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 	gtk_window_set_title (GTK_WINDOW (window), g_strdup_printf (_("A widget factory - GTK %d - %s"), TRUE_GTK_MAJOR_VERSION, VERSION));
 	gtk_window_set_icon_name (GTK_WINDOW (window), "awf");
 	awf2_set_theme (theme);
+	allow_update_theme = FALSE;
 
 	// base layout
 	vbox_window = BOXV;
@@ -724,6 +727,8 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 			gtk_paned_add2 (GTK_PANED (hpane2), hbox_notebook2);
 
 			awf2_create_notebooks (hbox_notebook1, hbox_notebook2);
+
+	allow_update_theme = TRUE;
 
 	// go
 	#if GTK_CHECK_VERSION (3,98,0)
