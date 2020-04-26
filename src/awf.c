@@ -63,9 +63,6 @@
 #define _(String) gettext (String)
 #define GETTEXT_PACKAGE "awf"
 
-#if !defined (G_SOURCE_CONTINUE)
-	#define G_SOURCE_CONTINUE TRUE // glib >= 2.32
-#endif
 #if GTK_CHECK_VERSION (3,98,0)
 	#define TRUE_GTK_MAJOR_VERSION 4
 	#define gtk_major_version gtk_get_major_version ()
@@ -371,7 +368,12 @@ static void awf_refresh_theme () {
 static gboolean awf_sighup_handler () {
 
 	awf_refresh_theme ();
+
+#if !defined (G_SOURCE_CONTINUE)
+	return TRUE; // glib < 2.32
+#else
 	return G_SOURCE_CONTINUE;
+#endif
 }
 
 static void awf_update_progressbars (GtkRange *range) {
