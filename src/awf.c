@@ -76,10 +76,8 @@
 	#define gtk_major_version gtk_get_major_version ()
 	#define gtk_minor_version gtk_get_minor_version ()
 	#define gtk_micro_version gtk_get_micro_version ()
-#else
-	#define TRUE_GTK_MAJOR_VERSION 2
 #endif
-#if GTK_CHECK_VERSION (3,2,0)
+#if GTK_CHECK_VERSION (3,0,0)
 	#define BOXH (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0))
 	#define BOXV (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0))
 	#define BOXHSEP (gtk_separator_new (GTK_ORIENTATION_HORIZONTAL))
@@ -87,6 +85,7 @@
 	#define BOXHPANE (gtk_paned_new (GTK_ORIENTATION_HORIZONTAL))
 	#define BOXVPANE (gtk_paned_new (GTK_ORIENTATION_VERTICAL))
 #else
+	#define TRUE_GTK_MAJOR_VERSION 2
 	#define BOXH (gtk_hbox_new (FALSE, 0))
 	#define BOXV (gtk_vbox_new (FALSE, 0))
 	#define BOXHSEP (gtk_hseparator_new ())
@@ -1208,7 +1207,7 @@ static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWid
 		gtk_widget_set_tooltip_text (progressbar2, "progress bar");
 	#endif
 
-	#if GTK_CHECK_VERSION (3,2,0)
+	#if GTK_CHECK_VERSION (3,0,0)
 		scale1 = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
 		gtk_widget_set_size_request (scale1, 175, -1);
 		gtk_range_set_value (GTK_RANGE (scale1), 50);
@@ -1224,7 +1223,7 @@ static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWid
 		g_signal_connect ((gpointer)scale1, "value_changed", G_CALLBACK (awf_update_progressbars), NULL);
 	#endif
 
-	#if GTK_CHECK_VERSION (3,2,0)
+	#if GTK_CHECK_VERSION (3,0,0)
 		scale2 = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
 		gtk_widget_set_size_request (scale2, 175, -1);
 		gtk_range_set_value (GTK_RANGE (scale2), 50);
@@ -1271,7 +1270,7 @@ static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWid
 		gtk_widget_set_tooltip_text (progressbar4, "progress bar");
 	#endif
 
-	#if GTK_CHECK_VERSION (3,2,0)
+	#if GTK_CHECK_VERSION (3,0,0)
 		scale3 = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, 0, 100, 1);
 		gtk_widget_set_size_request (scale3, -1, 100);
 		gtk_range_set_value (GTK_RANGE (scale3), 50);
@@ -1287,7 +1286,7 @@ static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWid
 		g_signal_connect ((gpointer)scale3, "value_changed", G_CALLBACK (awf_update_progressbars), NULL);
 	#endif
 
-	#if GTK_CHECK_VERSION (3,2,0)
+	#if GTK_CHECK_VERSION (3,0,0)
 		scale4 = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, 0, 100, 1);
 		gtk_widget_set_size_request (scale4, -1, 100);
 		gtk_range_set_value (GTK_RANGE (scale4), 50);
@@ -1305,7 +1304,7 @@ static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWid
 		g_signal_connect ((gpointer)scale4, "value_changed", G_CALLBACK (awf_update_progressbars), NULL);
 	#endif
 
-	#if GTK_CHECK_VERSION (3,2,0)
+	#if GTK_CHECK_VERSION (3,0,0)
 		scale5 = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, 0, 100, 1);
 		gtk_widget_set_size_request (scale5, -1, 100);
 		gtk_range_set_value (GTK_RANGE (scale5), 50);
@@ -1321,7 +1320,7 @@ static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWid
 		g_signal_connect ((gpointer)scale5, "value_changed", G_CALLBACK (awf_update_progressbars), NULL);
 	#endif
 
-	#if GTK_CHECK_VERSION (3,2,0)
+	#if GTK_CHECK_VERSION (3,0,0)
 		scale6 = gtk_scale_new_with_range (GTK_ORIENTATION_VERTICAL, 0, 100, 1);
 		gtk_widget_set_size_request (scale6, -1, 100);
 		gtk_range_set_value (GTK_RANGE (scale6), 50);
