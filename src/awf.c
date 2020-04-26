@@ -106,8 +106,8 @@ static GtkWidget *scale1, *scale2, *scale3, *scale4, *scale5, *scale6;
 static GtkWidget *progressbar1, *progressbar2, *progressbar3, *progressbar4;
 static GtkWidget *levelbar1, *levelbar2, *levelbar3, *levelbar4, *levelbar5, *levelbar6, *levelbar7, *levelbar8;
 static GtkWidget *notebook1, *notebook2, *notebook3, *notebook4;
-static gchar *screenshot;
-static gboolean startspinner = TRUE;
+static gchar *opt_screenshot;
+static gboolean opt_startspinner = TRUE;
 
 // local functions
 
@@ -130,12 +130,12 @@ static void awf2_create_spinbuttons (GtkWidget *root);
 static void awf2_create_checkbuttons (GtkWidget *root);
 static void awf2_create_radiobuttons (GtkWidget *root);
 static void awf2_create_otherbuttons (GtkWidget *root);
-static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkWidget *hroot1, GtkWidget *hroot2);
+static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWidget *root3, GtkWidget *root4);
 static void awf2_create_labels (GtkWidget *root);
 static void awf2_create_spinners (GtkWidget *root);
 static void awf2_create_expander (GtkWidget *root);
-static void awf2_create_frames (GtkWidget *lroot, GtkWidget *rroot);
-static void awf2_create_notebooks (GtkWidget *lroot, GtkWidget *rroot);
+static void awf2_create_frames (GtkWidget *root1, GtkWidget *root2);
+static void awf2_create_notebooks (GtkWidget *root1, GtkWidget *root2);
 static void awf2_create_notebook_tab (GtkWidget *notebook, gchar *text);
 static void awf2_create_treview (GtkWidget *root);
 // menuitems
@@ -204,10 +204,10 @@ int main (int argc, char **argv) {
 				g_printf ("%s\n", VERSION);
 				return status;
 			case 's':
-				screenshot = optarg;
+				opt_screenshot = optarg;
 				break;
 			case 'n':
-				startspinner = FALSE;
+				opt_startspinner = FALSE;
 			case 't':
 				if (g_slist_find_custom (list_system_theme, optarg, &awf_compare_theme) ||
 					g_slist_find_custom (list_user_theme, optarg, &awf_compare_theme))
@@ -361,7 +361,7 @@ static void awf_refresh_theme () {
 
 		awf2_update_statusbar (g_strdup_printf (_("Theme %s reloaded at"), current_theme), TRUE);
 
-		if (screenshot)
+		if (opt_screenshot)
 			g_timeout_add_seconds (1, awf2_take_screenshot, NULL);
 	}
 	else {
@@ -551,8 +551,8 @@ static gboolean awf2_take_screenshot () {
 	#endif
 
 	if (image) {
- 		gdk_pixbuf_save (image, screenshot, "png", NULL, "compression", "9", NULL);
-		awf2_update_statusbar (g_strdup_printf (_("Theme reloaded, then screenshot saved (%s) at"), screenshot), TRUE);
+ 		gdk_pixbuf_save (image, opt_screenshot, "png", NULL, "compression", "9", NULL);
+		awf2_update_statusbar (g_strdup_printf (_("Theme reloaded, then screenshot saved (%s) at"), opt_screenshot), TRUE);
 		g_object_unref (image);
 	}
 
@@ -1173,7 +1173,7 @@ static void awf2_create_otherbuttons (GtkWidget *root) {
 	gtk_container_add (GTK_CONTAINER (root), button12);
 }
 
-static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkWidget *hroot1, GtkWidget *hroot2) {
+static void awf2_create_progressbars (GtkWidget *root1, GtkWidget *root2, GtkWidget *root3, GtkWidget *root4) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkProgressBar.html
 	// https://developer.gnome.org/gtk3/stable/GtkLevelBar.html
@@ -1401,27 +1401,27 @@ static void awf2_create_progressbars (GtkWidget *vroot1, GtkWidget *vroot2, GtkW
 		gtk_widget_set_tooltip_text (levelbar8, "level bar");
 	#endif
 
-	gtk_container_add (GTK_CONTAINER (vroot1), progressbar1);
-	gtk_container_add (GTK_CONTAINER (vroot1), progressbar2);
-	gtk_container_add (GTK_CONTAINER (vroot1), scale1);
-	gtk_container_add (GTK_CONTAINER (vroot1), scale2);
-	awf2_boxpack (GTK_BOX (hroot1), progressbar3, FALSE, FALSE, 0, 0);
-	awf2_boxpack (GTK_BOX (hroot1), progressbar4, FALSE, FALSE, 0, 0);
+	gtk_container_add (GTK_CONTAINER (root1), progressbar1);
+	gtk_container_add (GTK_CONTAINER (root1), progressbar2);
+	gtk_container_add (GTK_CONTAINER (root1), scale1);
+	gtk_container_add (GTK_CONTAINER (root1), scale2);
+	awf2_boxpack (GTK_BOX (root3), progressbar3, FALSE, FALSE, 0, 0);
+	awf2_boxpack (GTK_BOX (root3), progressbar4, FALSE, FALSE, 0, 0);
 	#if GTK_CHECK_VERSION (3,6,0)
-		awf2_boxpack (GTK_BOX (hroot1), levelbar5, FALSE, FALSE, 0, 0);
-		awf2_boxpack (GTK_BOX (hroot1), levelbar6, FALSE, FALSE, 0, 0);
-		awf2_boxpack (GTK_BOX (hroot1), levelbar7, FALSE, FALSE, 0, 0);
-		awf2_boxpack (GTK_BOX (hroot1), levelbar8, FALSE, FALSE, 0, 0);
+		awf2_boxpack (GTK_BOX (root3), levelbar5, FALSE, FALSE, 0, 0);
+		awf2_boxpack (GTK_BOX (root3), levelbar6, FALSE, FALSE, 0, 0);
+		awf2_boxpack (GTK_BOX (root3), levelbar7, FALSE, FALSE, 0, 0);
+		awf2_boxpack (GTK_BOX (root3), levelbar8, FALSE, FALSE, 0, 0);
 	#endif
-	awf2_boxpack (GTK_BOX (hroot2), scale3, FALSE, FALSE, 0, 0);
-	awf2_boxpack (GTK_BOX (hroot2), scale4, FALSE, FALSE, 0, 0);
-	awf2_boxpack (GTK_BOX (hroot2), scale5, FALSE, FALSE, 0, 0);
-	awf2_boxpack (GTK_BOX (hroot2), scale6, FALSE, FALSE, 0, 0);
+	awf2_boxpack (GTK_BOX (root4), scale3, FALSE, FALSE, 0, 0);
+	awf2_boxpack (GTK_BOX (root4), scale4, FALSE, FALSE, 0, 0);
+	awf2_boxpack (GTK_BOX (root4), scale5, FALSE, FALSE, 0, 0);
+	awf2_boxpack (GTK_BOX (root4), scale6, FALSE, FALSE, 0, 0);
 	#if GTK_CHECK_VERSION (3,6,0)
-		gtk_container_add (GTK_CONTAINER (vroot2), levelbar1);
-		gtk_container_add (GTK_CONTAINER (vroot2), levelbar2);
-		gtk_container_add (GTK_CONTAINER (vroot2), levelbar3);
-		gtk_container_add (GTK_CONTAINER (vroot2), levelbar4);
+		gtk_container_add (GTK_CONTAINER (root2), levelbar1);
+		gtk_container_add (GTK_CONTAINER (root2), levelbar2);
+		gtk_container_add (GTK_CONTAINER (root2), levelbar3);
+		gtk_container_add (GTK_CONTAINER (root2), levelbar4);
 	#endif
 }
 
@@ -1453,14 +1453,14 @@ static void awf2_create_spinners (GtkWidget *root) {
 	spinner1 = gtk_spinner_new ();
 	gtk_widget_set_size_request (spinner1, 20, 20);
 	gtk_widget_set_tooltip_text (spinner1, "spinner");
-	if (startspinner)
+	if (opt_startspinner)
 		gtk_spinner_start (GTK_SPINNER (spinner1));
 
 	spinner2 = gtk_spinner_new ();
 	gtk_widget_set_size_request (spinner2, 20, 20);
 	gtk_widget_set_tooltip_text (spinner2, "spinner");
 	gtk_widget_set_sensitive (spinner2, FALSE);
-	if (startspinner)
+	if (opt_startspinner)
 		gtk_spinner_start (GTK_SPINNER (spinner2));
 
 	awf2_boxpack (GTK_BOX (root), spinner1, FALSE, FALSE, 0, 0);
@@ -1495,7 +1495,7 @@ static void awf2_create_expander (GtkWidget *root) {
 	gtk_container_add (GTK_CONTAINER (root), expander);
 }
 
-static void awf2_create_frames (GtkWidget *lroot, GtkWidget *rroot) {
+static void awf2_create_frames (GtkWidget *root1, GtkWidget *root2) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkFrame.html
 
@@ -1537,13 +1537,13 @@ static void awf2_create_frames (GtkWidget *lroot, GtkWidget *rroot) {
 		gtk_frame_set_shadow_type (GTK_FRAME (frame4), GTK_SHADOW_ETCHED_OUT);
 	#endif
 
-	gtk_container_add (GTK_CONTAINER (lroot), frame1);
-	gtk_container_add (GTK_CONTAINER (lroot), frame2);
-	gtk_container_add (GTK_CONTAINER (rroot), frame3);
-	gtk_container_add (GTK_CONTAINER (rroot), frame4);
+	gtk_container_add (GTK_CONTAINER (root1), frame1);
+	gtk_container_add (GTK_CONTAINER (root1), frame2);
+	gtk_container_add (GTK_CONTAINER (root2), frame3);
+	gtk_container_add (GTK_CONTAINER (root2), frame4);
 }
 
-static void awf2_create_notebooks (GtkWidget *lroot, GtkWidget *rroot) {
+static void awf2_create_notebooks (GtkWidget *root1, GtkWidget *root2) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkNotebook.html
 	// https://developer.gnome.org/gtk3/stable/GtkEventControllerScroll.html
@@ -1622,10 +1622,10 @@ static void awf2_create_notebooks (GtkWidget *lroot, GtkWidget *rroot) {
 		awf2_create_notebook_tab (notebook4, "tab3");
 		awf2_create_notebook_tab (notebook4, "tab4");
 
-	gtk_container_add (GTK_CONTAINER (lroot), notebook1);
-	gtk_container_add (GTK_CONTAINER (lroot), notebook2);
-	gtk_container_add (GTK_CONTAINER (rroot), notebook3);
-	gtk_container_add (GTK_CONTAINER (rroot), notebook4);
+	gtk_container_add (GTK_CONTAINER (root1), notebook1);
+	gtk_container_add (GTK_CONTAINER (root1), notebook2);
+	gtk_container_add (GTK_CONTAINER (root2), notebook3);
+	gtk_container_add (GTK_CONTAINER (root2), notebook4);
 }
 
 static void awf2_create_notebook_tab (GtkWidget *notebook, gchar *text) {
@@ -1731,7 +1731,6 @@ static void awf2_create_menubar (GMenu *root) {
 	menu = g_menu_new ();
 	g_menu_append_submenu (root, _("_Options"), G_MENU_MODEL (menu));
 	g_menu_append (menu, _("gtk-about"), "awf2_show_dialog_about");
-	//g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_about), NULL);
 }
 
 #else
