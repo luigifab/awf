@@ -95,14 +95,6 @@
 	#define BOXVPANE (gtk_vpaned_new ())
 #endif
 
-// enums
-
-enum {
-	COLUMN1 = 0,
-	COLUMN2,
-	NUM_COLS
-};
-
 // global local variables
 
 static gchar *current_theme;
@@ -133,7 +125,6 @@ static gboolean awf2_take_screenshot ();
 // widgets
 static void awf2_create_window (gpointer app, gchar *theme);
 static void awf2_boxpack (GtkBox *box, GtkWidget *widget, gboolean fill, gboolean expand, guint padding, guint spacing);
-static void awf2_create_menubar (GtkWidget *root);
 static void awf2_create_toolbar (GtkWidget *root);
 static void awf2_create_combos_entries (GtkWidget *root);
 static void awf2_create_spinbuttons (GtkWidget *root);
@@ -149,12 +140,17 @@ static void awf2_create_notebooks (GtkWidget *lroot, GtkWidget *rroot);
 static void awf2_create_notebook_tab (GtkWidget *notebook, gchar *text);
 static void awf2_create_treview (GtkWidget *root);
 // menuitems
+#if GTK_CHECK_VERSION (3,98,0)
+static void awf2_create_menubar (GMenu *root);
+#else
+static void awf2_create_menubar (GtkWidget *root);
 static GtkWidget* awf2_new_menu (GtkWidget *root, gchar *text);
 static GtkWidget* awf2_new_menu_tearoff (GtkWidget *menu);
 static GtkWidget* awf2_new_menu_separator (GtkWidget *menu);
 static GtkWidget* awf2_new_menu_check (GtkWidget *menu, gchar *text, gboolean checked, gboolean inconsistent, gboolean disabled);
 static GtkWidget* awf2_new_menu_radio (GtkWidget *menu, gchar *text, gboolean checked, gboolean inconsistent, gboolean disabled, GSList *group);
 static GtkWidget* awf2_new_menu_item (GtkWidget *menu, gchar *text, gchar *accel, gchar *image, gboolean disabled);
+#endif
 // dialogs
 static void awf2_show_dialog_open (GtkWidget *widget);
 static void awf2_show_dialog_open_recent (GtkWidget *widget);
@@ -599,18 +595,9 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 	gtk_container_add (GTK_CONTAINER (window), vbox_window);
 
 		#if GTK_CHECK_VERSION (3,98,0)
-
-			GMenu *gmm, *gms;
+			GMenu *gmm;
 			gmm = g_menu_new ();
-				gms = g_menu_new ();
-				g_menu_append_submenu (gmm, _("_System theme"), G_MENU_MODEL (gms));
-				g_menu_append (gms, _("No theme found"), NULL);
-				gms = g_menu_new ();
-				g_menu_append_submenu (gmm, _("_User theme"), G_MENU_MODEL (gms));
-				g_menu_append (gms, _("No theme found"), NULL);
-				gms = g_menu_new ();
-				g_menu_append_submenu (gmm, _("_Options"), G_MENU_MODEL (gms));
-				g_menu_append (gms, _("gtk-open"), NULL);
+			awf2_create_menubar (gmm);
 			gtk_application_set_menubar (app, G_MENU_MODEL (gmm));
 
 			toolbar = BOXH;
@@ -789,114 +776,6 @@ static void awf2_boxpack (GtkBox *box, GtkWidget *widget, gboolean fill, gboolea
 			gtk_box_set_spacing (GTK_BOX (widget), spacing);
 		gtk_box_pack_start (box, widget, fill, expand, 0);
 	#endif
-}
-
-static void awf2_create_menubar (GtkWidget *root) {
-
-	// https://developer.gnome.org/gtk3/stable/GtkMenu.html
-	// https://developer.gnome.org/gtk3/stable/GtkMenuItem.html
-	// https://developer.gnome.org/gtk3/stable/GtkRadioMenuItem.html
-
-	GtkWidget *menu, *submenu, *menuitem;
-	GSList *iterator, *group = NULL;
-
-	menu = awf2_new_menu (root, _("_System theme"));
-	for (iterator = list_system_theme; iterator; iterator = iterator->next) {
-		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
-		#if !GTK_CHECK_VERSION (3,98,0)
-			group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
-		#endif
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_set_theme), iterator->data);
-		#if !GTK_CHECK_VERSION (3,98,0)
-			if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
-				gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
-		#endif
-	}
-
-	if (!list_system_theme)
-		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
-
-	menu = awf2_new_menu (root, _("_User theme"));
-	for (iterator = list_user_theme; iterator; iterator = iterator->next) {
-		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
-		#if !GTK_CHECK_VERSION (3,98,0)
-			group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
-		#endif
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_set_theme), iterator->data);
-		#if !GTK_CHECK_VERSION (3,98,0)
-			if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
-				gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
-		#endif
-	}
-
-	if (!list_user_theme)
-		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
-
-	menu = awf2_new_menu (root, _("_Options"));
-		awf2_new_menu_tearoff (menu);
-
-		menuitem = awf2_new_menu_item (menu, "", "<Control>o", "gtk-open", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_open), NULL);
-
-		menuitem = awf2_new_menu_item (menu, _("Open recent file"), "", "", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_open_recent), NULL);
-
-		menuitem = awf2_new_menu_item (menu, _("Calendar"), "", "", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_calendar), NULL);
-
-		menuitem = awf2_new_menu_item (menu, "", "<Control>s", "gtk-save", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_save), NULL);
-
-		menuitem = awf2_new_menu_item (menu, _("Refresh theme"), "F5", "gtk-refresh", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf_refresh_theme), NULL);
-
-		menuitem = awf2_new_menu_item (menu, "", "<Alt>Return", "gtk-properties", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_properties), NULL);
-
-		menuitem = awf2_new_menu_item (menu, "", "", "gtk-page-setup", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_page_setup), NULL);
-
-		menuitem = awf2_new_menu_item (menu, "", "<Control>p", "gtk-print", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_print), NULL);
-
-		menuitem = awf2_new_menu_item (menu, "", "", "gtk-about", FALSE);
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_about), NULL);
-
-		submenu = awf2_new_menu (menu, _("More..."));
-			awf2_new_menu_item (submenu, "", "<Control>x", "gtk-cut", FALSE);
-			awf2_new_menu_item (submenu, "", "<Control>c", "gtk-copy", FALSE);
-			awf2_new_menu_item (submenu, "", "<Control>v", "gtk-paste", FALSE);
-
-		awf2_new_menu_separator (menu);
-		awf2_new_menu_check (menu, g_strdup_printf ("Check 1 %s", _("(unchecked)")), FALSE, FALSE, FALSE);
-		awf2_new_menu_check (menu, g_strdup_printf ("Check 2 %s", _("(checked)")), TRUE, FALSE, FALSE);
-		awf2_new_menu_check (menu, g_strdup_printf ("Check 3 %s", _("(inconsistent)")), FALSE, TRUE, FALSE);
-
-		awf2_new_menu_separator (menu);
-		awf2_new_menu_check (menu, g_strdup_printf ("Check 1 %s", _("(unchecked)")), FALSE, FALSE, TRUE);
-		awf2_new_menu_check (menu, g_strdup_printf ("Check 2 %s", _("(checked)")), TRUE, FALSE, TRUE);
-		awf2_new_menu_check (menu, g_strdup_printf ("Check 3 %s", _("(inconsistent)")), FALSE, TRUE, TRUE);
-
-		awf2_new_menu_separator (menu);
-		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 1 %s", _("(unchecked)")), FALSE, FALSE, FALSE, NULL);
-		#if !GTK_CHECK_VERSION (3,98,0)
-			group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
-		#endif
-		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 2 %s", _("(checked)")), TRUE, FALSE, FALSE, group);
-				 awf2_new_menu_radio (menu, g_strdup_printf ("Radio 3 %s", _("(inconsistent)")), FALSE, TRUE, FALSE, NULL);
-
-		awf2_new_menu_separator (menu);
-		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 1 %s", _("(unchecked)")), FALSE, FALSE, TRUE, NULL);
-		#if !GTK_CHECK_VERSION (3,98,0)
-			group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
-		#endif
-		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 2 %s", _("(checked)")), TRUE, FALSE, TRUE, group);
-				 awf2_new_menu_radio (menu, g_strdup_printf ("Radio 3 %s", _("(inconsistent)")), FALSE, TRUE, TRUE, NULL);
-
-		awf2_new_menu_separator (menu);
-		awf2_new_menu_item (menu, "", "<Control>w", "gtk-close", TRUE);
-		menuitem = awf2_new_menu_item (menu, "", "<Control>q", "gtk-quit", FALSE);
-		//g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (), NULL);
 }
 
 static void awf2_create_toolbar (GtkWidget *root) {
@@ -1783,20 +1662,20 @@ static void awf2_create_treview (GtkWidget *root) {
 	gtk_widget_set_size_request (view, 200, 200);
 
 	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view), -1, "Longer column 1", renderer, "text", COLUMN1, NULL);
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view), -1, "Longer column 1", renderer, "text", 0, NULL);
 
 	renderer = gtk_cell_renderer_text_new ();
-	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view), -1, "Longer column 2", renderer, "text", COLUMN2, NULL);
+	gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (view), -1, "Longer column 2", renderer, "text", 1, NULL);
 
-	store = gtk_list_store_new (NUM_COLS, G_TYPE_STRING, G_TYPE_STRING);
+	store = gtk_list_store_new (2, G_TYPE_STRING, G_TYPE_STRING);
 	gtk_list_store_append (store, &iter);
-	gtk_list_store_set (store, &iter, COLUMN1, "Longer cell 1.1", COLUMN2, "Longer cell 1.2", -1);
+	gtk_list_store_set (store, &iter, 0, "Longer cell 1.1", 1, "Longer cell 1.2", -1);
 	gtk_list_store_append (store, &iter);
-	gtk_list_store_set (store, &iter, COLUMN1, "Longer cell 2.1", COLUMN2, "Longer cell 2.2", -1);
+	gtk_list_store_set (store, &iter, 0, "Longer cell 2.1", 1, "Longer cell 2.2", -1);
 	gtk_list_store_append (store, &iter);
-	gtk_list_store_set (store, &iter, COLUMN1, "Longer cell 3.1", COLUMN2, "Longer cell 3.2", -1);
+	gtk_list_store_set (store, &iter, 0, "Longer cell 3.1", 1, "Longer cell 3.2", -1);
 	gtk_list_store_append (store, &iter);
-	gtk_list_store_set (store, &iter, COLUMN1, "Longer cell 4.1", COLUMN2, "Longer cell 4.2", -1);
+	gtk_list_store_set (store, &iter, 0, "Longer cell 4.1", 1, "Longer cell 4.2", -1);
 
 	model = GTK_TREE_MODEL (store);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (view), model);
@@ -1812,7 +1691,146 @@ static void awf2_create_treview (GtkWidget *root) {
 
 // menuitems
 
-#if !GTK_CHECK_VERSION (3,98,0)
+#if GTK_CHECK_VERSION (3,98,0)
+
+static void awf2_create_menubar (GMenu *root) {
+
+	GMenu *menu;
+	GMenuItem *menuitem;
+	GSList *iterator;
+	gint idx;
+
+	menu = g_menu_new ();
+	g_menu_append_submenu (root, _("_System theme"), G_MENU_MODEL (menu));
+	for (iterator = list_system_theme, idx = 0; iterator; iterator = iterator->next) {
+		menuitem = g_menu_item_new (iterator->data, NULL);
+		g_menu_item_set_action_and_target_value (menuitem, "awf2_set_theme", iterator->data);
+		g_menu_insert_item (menu, idx, menuitem);
+		idx++;
+		//if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
+		//	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
+	}
+
+	if (!list_system_theme)
+		g_menu_append (menu, _("No theme found"), "disabled");
+
+	menu = g_menu_new ();
+	g_menu_append_submenu (root, _("_User theme"), G_MENU_MODEL (menu));
+	for (iterator = list_user_theme, idx = 0; iterator; iterator = iterator->next) {
+		menuitem = g_menu_item_new (iterator->data, NULL);
+		g_menu_item_set_action_and_target_value (menuitem, "awf2_set_theme", iterator->data);
+		g_menu_insert_item (menu, idx, menuitem);
+		idx++;
+		//if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
+		//	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
+	}
+
+	if (!list_user_theme)
+		g_menu_append (menu, _("No theme found"), "disabled");
+
+	menu = g_menu_new ();
+	g_menu_append_submenu (root, _("_Options"), G_MENU_MODEL (menu));
+	g_menu_append (menu, _("gtk-about"), "awf2_show_dialog_about");
+	//g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_about), NULL);
+}
+
+#else
+
+static void awf2_create_menubar (GtkWidget *root) {
+
+	// https://developer.gnome.org/gtk3/stable/GtkMenu.html
+	// https://developer.gnome.org/gtk3/stable/GtkMenuItem.html
+	// https://developer.gnome.org/gtk3/stable/GtkRadioMenuItem.html
+
+	GtkWidget *menu, *submenu, *menuitem;
+	GSList *iterator, *group = NULL;
+
+	menu = awf2_new_menu (root, _("_System theme"));
+	for (iterator = list_system_theme; iterator; iterator = iterator->next) {
+		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
+		group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_set_theme), iterator->data);
+		if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
+			gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
+	}
+
+	if (!list_system_theme)
+		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
+
+	menu = awf2_new_menu (root, _("_User theme"));
+	for (iterator = list_user_theme; iterator; iterator = iterator->next) {
+		menuitem = awf2_new_menu_radio (menu, iterator->data, FALSE, FALSE, FALSE, group);
+		group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_set_theme), iterator->data);
+		if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
+			gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
+	}
+
+	if (!list_user_theme)
+		awf2_new_menu_item (menu, _("No theme found"), "", "", TRUE);
+
+	menu = awf2_new_menu (root, _("_Options"));
+		awf2_new_menu_tearoff (menu);
+
+		menuitem = awf2_new_menu_item (menu, "", "<Control>o", "gtk-open", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_open), NULL);
+
+		menuitem = awf2_new_menu_item (menu, _("Open recent file"), "", "", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_open_recent), NULL);
+
+		menuitem = awf2_new_menu_item (menu, _("Calendar"), "", "", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_calendar), NULL);
+
+		menuitem = awf2_new_menu_item (menu, "", "<Control>s", "gtk-save", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_save), NULL);
+
+		menuitem = awf2_new_menu_item (menu, _("Refresh theme"), "F5", "gtk-refresh", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf_refresh_theme), NULL);
+
+		menuitem = awf2_new_menu_item (menu, "", "<Alt>Return", "gtk-properties", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_properties), NULL);
+
+		menuitem = awf2_new_menu_item (menu, "", "", "gtk-page-setup", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_page_setup), NULL);
+
+		menuitem = awf2_new_menu_item (menu, "", "<Control>p", "gtk-print", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_print), NULL);
+
+		menuitem = awf2_new_menu_item (menu, "", "", "gtk-about", FALSE);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_show_dialog_about), NULL);
+
+		submenu = awf2_new_menu (menu, _("More..."));
+			awf2_new_menu_item (submenu, "", "<Control>x", "gtk-cut", FALSE);
+			awf2_new_menu_item (submenu, "", "<Control>c", "gtk-copy", FALSE);
+			awf2_new_menu_item (submenu, "", "<Control>v", "gtk-paste", FALSE);
+
+		awf2_new_menu_separator (menu);
+		awf2_new_menu_check (menu, g_strdup_printf ("Check 1 %s", _("(unchecked)")), FALSE, FALSE, FALSE);
+		awf2_new_menu_check (menu, g_strdup_printf ("Check 2 %s", _("(checked)")), TRUE, FALSE, FALSE);
+		awf2_new_menu_check (menu, g_strdup_printf ("Check 3 %s", _("(inconsistent)")), FALSE, TRUE, FALSE);
+
+		awf2_new_menu_separator (menu);
+		awf2_new_menu_check (menu, g_strdup_printf ("Check 1 %s", _("(unchecked)")), FALSE, FALSE, TRUE);
+		awf2_new_menu_check (menu, g_strdup_printf ("Check 2 %s", _("(checked)")), TRUE, FALSE, TRUE);
+		awf2_new_menu_check (menu, g_strdup_printf ("Check 3 %s", _("(inconsistent)")), FALSE, TRUE, TRUE);
+
+		awf2_new_menu_separator (menu);
+		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 1 %s", _("(unchecked)")), FALSE, FALSE, FALSE, NULL);
+		group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
+		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 2 %s", _("(checked)")), TRUE, FALSE, FALSE, group);
+				 awf2_new_menu_radio (menu, g_strdup_printf ("Radio 3 %s", _("(inconsistent)")), FALSE, TRUE, FALSE, NULL);
+
+		awf2_new_menu_separator (menu);
+		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 1 %s", _("(unchecked)")), FALSE, FALSE, TRUE, NULL);
+		group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
+		menuitem = awf2_new_menu_radio (menu, g_strdup_printf ("Radio 2 %s", _("(checked)")), TRUE, FALSE, TRUE, group);
+				 awf2_new_menu_radio (menu, g_strdup_printf ("Radio 3 %s", _("(inconsistent)")), FALSE, TRUE, TRUE, NULL);
+
+		awf2_new_menu_separator (menu);
+		awf2_new_menu_item (menu, "", "<Control>w", "gtk-close", TRUE);
+		menuitem = awf2_new_menu_item (menu, "", "<Control>q", "gtk-quit", FALSE);
+		//g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (), NULL);
+}
 
 static GtkWidget* awf2_new_menu (GtkWidget *root, gchar *text) {
 
