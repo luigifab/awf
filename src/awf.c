@@ -21,7 +21,7 @@
  * GNU General Public License (GPL) for more details.
  *
  *
- * The Widget Factory is a program designed to show a wide range of widgets on a single window.
+ * A Widget Factory is a program designed to show a wide range of widgets on a single window.
  *
  * Translations update:
  *  xgettext -d awf -o src/awf.pot -k_ -s src/awf.c
@@ -123,7 +123,7 @@ static gboolean startspinner = TRUE;
 static GSList* awf_load_theme (gchar *directory);
 static void awf_exclude_theme (gpointer theme, gpointer unused);
 static gint awf_compare_theme (gconstpointer theme1, gconstpointer theme2);
-static void awf_set_theme (gpointer theme);
+static void awf2_set_theme (gpointer theme);
 static void awf_refresh_theme ();
 static gboolean awf_sighup_handler ();
 static void awf_update_progressbars (GtkRange *range);
@@ -181,6 +181,7 @@ int main (int argc, char **argv) {
 	GSList *iterator;
 
 	// load available themes
+	// @todo replace GSLists?
 	list_system_theme = awf_load_theme ("/usr/share/themes");
 	list_system_theme = g_slist_sort (list_system_theme, (GCompareFunc)awf_compare_theme);
 
@@ -336,16 +337,17 @@ static gint awf_compare_theme (gconstpointer theme1, gconstpointer theme2) {
 	return g_strcmp0 ((gchar*)theme1, (gchar*)theme2);
 }
 
-static void awf_set_theme (gpointer theme) {
+static void awf2_set_theme (gpointer theme) {
 
-	g_object_set (gtk_settings_get_default (), "gtk-theme-name", (gchar*)theme,  NULL);
+	if ((gchar*)theme != "auto")
+		g_object_set (gtk_settings_get_default (), "gtk-theme-name", (gchar*)theme,  NULL);
+
 	g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
 
-	if (window)
+	if (window && statusbar) {
 		gtk_window_resize (GTK_WINDOW (window), 50, 50);
-
-	if (statusbar)
 		awf2_update_statusbar (g_strdup_printf (_("Theme %s loaded."), current_theme), FALSE);
+	}
 }
 
 static void awf_refresh_theme () {
@@ -590,11 +592,7 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 
 	gtk_window_set_title (GTK_WINDOW (window), g_strdup_printf (_("A widget factory - GTK %d - %s"), TRUE_GTK_MAJOR_VERSION, VERSION));
 	gtk_window_set_icon_name (GTK_WINDOW (window), "awf");
-
-	if (theme != "auto")
-		awf_set_theme (theme);
-	else
-		g_object_get (gtk_settings_get_default (), "gtk-theme-name", &current_theme, NULL);
+	awf2_set_theme (theme);
 
 	// base layout
 	vbox_window = BOXV;
@@ -808,7 +806,7 @@ static void awf2_create_menubar (GtkWidget *root) {
 		#if !GTK_CHECK_VERSION (3,98,0)
 			group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
 		#endif
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf_set_theme), iterator->data);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_set_theme), iterator->data);
 		#if !GTK_CHECK_VERSION (3,98,0)
 			if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
 				gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
@@ -824,7 +822,7 @@ static void awf2_create_menubar (GtkWidget *root) {
 		#if !GTK_CHECK_VERSION (3,98,0)
 			group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (menuitem));
 		#endif
-		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf_set_theme), iterator->data);
+		g_signal_connect_swapped (G_OBJECT (menuitem), "activate", G_CALLBACK (awf2_set_theme), iterator->data);
 		#if !GTK_CHECK_VERSION (3,98,0)
 			if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
 				gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
