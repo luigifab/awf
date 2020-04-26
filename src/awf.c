@@ -102,7 +102,6 @@ static GSList *list_system_theme;
 static GSList *list_user_theme;
 static GtkWidget *window, *statusbar;
 static GtkWidget *spinbutton1, *spinbutton2;
-static GtkWidget *spinner1, *spinner2;
 static GtkWidget *scale1, *scale2, *scale3, *scale4, *scale5, *scale6;
 static GtkWidget *progressbar1, *progressbar2, *progressbar3, *progressbar4;
 static GtkWidget *levelbar1, *levelbar2, *levelbar3, *levelbar4, *levelbar5, *levelbar6, *levelbar7, *levelbar8;
@@ -1448,6 +1447,8 @@ static void awf2_create_labels (GtkWidget *root) {
 static void awf2_create_spinners (GtkWidget *root) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkSpinner.html
+
+	GtkWidget *spinner1, *spinner2;
 
 	spinner1 = gtk_spinner_new ();
 	gtk_widget_set_size_request (spinner1, 20, 20);
