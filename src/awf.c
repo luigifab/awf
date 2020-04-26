@@ -120,7 +120,7 @@ static void awf_refresh_theme ();
 static gboolean awf_sighup_handler ();
 static void awf_update_progressbars (GtkRange *range);
 static void awf2_update_statusbar (gchar *text, gboolean withtime);
-static void awf2_update_widgets ();
+static void awf2_update_widgets (GtkWidget *widget);
 static gboolean awf2_take_screenshot ();
 // widgets
 static void awf2_create_window (gpointer app, gchar *theme);
@@ -171,8 +171,7 @@ static void awf2_gdkscroll_notebook_tabs (GtkWidget *widget, GdkEventScroll *eve
 
 int main (int argc, char **argv) {
 
-	int status = 0;
-	gint opt;
+	int status = 0, opt;
 	gchar *directory, *theme = "auto";
 	GSList *iterator;
 
@@ -446,7 +445,7 @@ static void awf2_update_statusbar (gchar *text, gboolean withtime) {
 	}
 }
 
-static void awf2_update_widgets () {
+static void awf2_update_widgets (GtkWidget *widget) {
 
 	// https://developer.gnome.org/gtk3/stable/GtkNotebook.html
 	// https://developer.gnome.org/gtk3/stable/GtkSpinButton.html
