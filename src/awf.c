@@ -120,7 +120,7 @@ static void awf_refresh_theme ();
 static gboolean awf_sighup_handler ();
 static void awf_update_progressbars (GtkRange *range);
 static void awf2_update_statusbar (gchar *text, gboolean withtime);
-static void awf2_update_widgets (GtkWidget *widget);
+static void awf2_update_widgets ();
 static gboolean awf2_take_screenshot ();
 // widgets
 static void awf2_create_window (gpointer app, gchar *theme);
@@ -152,14 +152,14 @@ static GtkWidget* awf2_new_menu_radio (GtkWidget *menu, gchar *text, gboolean ch
 static GtkWidget* awf2_new_menu_item (GtkWidget *menu, gchar *text, gchar *accel, gchar *image, gboolean disabled);
 #endif
 // dialogs
-static void awf2_show_dialog_open (GtkWidget *widget);
-static void awf2_show_dialog_open_recent (GtkWidget *widget);
-static void awf2_show_dialog_save (GtkWidget *widget);
-static void awf2_show_dialog_properties (GtkWidget *widget);
-static void awf2_show_dialog_page_setup (GtkWidget *widget);
-static void awf2_show_dialog_print (GtkWidget *widget);
-static void awf2_show_dialog_about (GtkWidget *widget);
-static void awf2_show_dialog_calendar (GtkWidget *widget);
+static void awf2_show_dialog_open ();
+static void awf2_show_dialog_open_recent ();
+static void awf2_show_dialog_save ();
+static void awf2_show_dialog_properties ();
+static void awf2_show_dialog_page_setup ();
+static void awf2_show_dialog_print ();
+static void awf2_show_dialog_about ();
+static void awf2_show_dialog_calendar ();
 // gtk3
 #if GTK_CHECK_VERSION (3,98,0)
 static void awf2_evtscroll_notebook_tabs (GtkEventControllerScroll *event, gdouble dx, gdouble dy, GtkWidget *widget);
@@ -446,7 +446,7 @@ static void awf2_update_statusbar (gchar *text, gboolean withtime) {
 	}
 }
 
-static void awf2_update_widgets (GtkWidget *widget) {
+static void awf2_update_widgets () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkNotebook.html
 	// https://developer.gnome.org/gtk3/stable/GtkSpinButton.html
@@ -1935,7 +1935,7 @@ static GtkWidget* awf2_new_menu_item (GtkWidget *menu, gchar *text, gchar *accel
 
 // dialogs
 
-static void awf2_show_dialog_open (GtkWidget *widget) {
+static void awf2_show_dialog_open () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkFileChooserDialog.html
 
@@ -1956,7 +1956,7 @@ static void awf2_show_dialog_open (GtkWidget *widget) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_open_recent (GtkWidget *widget) {
+static void awf2_show_dialog_open_recent () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkRecentChooserDialog.html
 
@@ -1979,7 +1979,7 @@ static void awf2_show_dialog_open_recent (GtkWidget *widget) {
 	#endif
 }
 
-static void awf2_show_dialog_save (GtkWidget *widget) {
+static void awf2_show_dialog_save () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkFileChooserDialog.html
 
@@ -2000,7 +2000,7 @@ static void awf2_show_dialog_save (GtkWidget *widget) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_properties (GtkWidget *widget) {
+static void awf2_show_dialog_properties () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkMessageDialog.html
 
@@ -2021,7 +2021,7 @@ static void awf2_show_dialog_properties (GtkWidget *widget) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_page_setup (GtkWidget *widget) {
+static void awf2_show_dialog_page_setup () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkPageSetupUnixDialog.html
 
@@ -2036,7 +2036,7 @@ static void awf2_show_dialog_page_setup (GtkWidget *widget) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_print (GtkWidget *widget) {
+static void awf2_show_dialog_print () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkPrintUnixDialog.html
 
@@ -2051,7 +2051,7 @@ static void awf2_show_dialog_print (GtkWidget *widget) {
 	gtk_widget_destroy (dialog);
 }
 
-static void awf2_show_dialog_about (GtkWidget *widget) {
+static void awf2_show_dialog_about () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkAboutDialog.html
 
@@ -2074,7 +2074,7 @@ static void awf2_show_dialog_about (GtkWidget *widget) {
 		NULL);
 }
 
-static void awf2_show_dialog_calendar (GtkWidget *widget) {
+static void awf2_show_dialog_calendar () {
 
 	// https://developer.gnome.org/gtk3/stable/GtkDialog.html
 	// https://developer.gnome.org/gtk3/stable/GtkInfoBar.html
