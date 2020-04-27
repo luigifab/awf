@@ -40,7 +40,7 @@ ls ~/.themes/yourtheme/gtk-3.0/*.css | entr killall -s SIGHUP awf-gtk3
 This program is provided under the terms of the GNU GPLv3 license.
 
 * Updated by Fabrice Creuzot (luigifab)
-* Created by Valère Monseur (valr)
+* Forked from [awf](https://github.com/valr/awf) created by Valère Monseur (valr)
 * Thanks to Ottoman Kent (for testing in ubuntu and bug report)
 * Thanks to Dwight Engen (for rpm specification file: awf.spec.in)
 * Thanks to Josef Radinger (for sorted menus, text in progress bars, treeviews with scrollbars)
