@@ -2,37 +2,37 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-22 11:20+0200\n"
-"PO-Revision-Date: 2020-04-22 11:20+0200\n"
+"POT-Creation-Date: 2020-04-27 15:50+0200\n"
+"PO-Revision-Date: 2020-04-27 15:50+0200\n"
 "Last-Translator: Fabrice Creuzot <code~luigifab~fr>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/awf.c:234 src/awf.c:2036
+#: src/awf.c:227 src/awf.c:2080
 #, c-format
 msgid " started with gtk %d.%d.%d and glib %d.%d.%d"
 msgstr " démarré avec gtk %d.%d.%d et glib %d.%d.%d"
 
-#: src/awf.c:865 src/awf.c:870 src/awf.c:878 src/awf.c:886
+#: src/awf.c:1824 src/awf.c:1829 src/awf.c:1835 src/awf.c:1841
 msgid "(checked)"
 msgstr "(coché)"
 
-#: src/awf.c:866 src/awf.c:871 src/awf.c:879 src/awf.c:887
+#: src/awf.c:1825 src/awf.c:1830 src/awf.c:1836 src/awf.c:1842
 msgid "(inconsistent)"
 msgstr "(inconsistant)"
 
-#: src/awf.c:864 src/awf.c:869 src/awf.c:874 src/awf.c:882
+#: src/awf.c:1823 src/awf.c:1828 src/awf.c:1833 src/awf.c:1839
 msgid "(unchecked)"
 msgstr "(décoché)"
 
-#: src/awf.c:230 src/awf.c:586
+#: src/awf.c:223 src/awf.c:591
 #, c-format
 msgid "A widget factory - GTK %d - %s"
 msgstr "La fabrique à widgets - GTK %d - %s"
 
-#: src/awf.c:1601 src/awf.c:1987 src/awf.c:2032
+#: src/awf.c:1498 src/awf.c:2031 src/awf.c:2076
 msgid ""
 "A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It "
 "displays the various widget types provided by GTK in a single window "
@@ -42,102 +42,106 @@ msgstr ""
 "et gtk4. Elle affiche les différents types de widgets fournis par GTK "
 "dansune seule fenêtre permettant de voir l'effet visuel du thème appliqué."
 
-#: src/awf.c:837
+#: src/awf.c:1796
 msgid "Calendar"
 msgstr "Calendrier"
 
-#: src/awf.c:244
+#: src/awf.c:237
 msgid "Don't start spinners"
 msgstr "Ne pas démarrer les spinners"
 
-#: src/awf.c:243
-msgid "List available themes (and quit)"
-msgstr "Lister les thèmes disponibles (et quitter)"
+#: src/awf.c:236
+msgid "List available themes"
+msgstr "Lister les thèmes disponibles"
 
-#: src/awf.c:858 src/awf.c:1590
+#: src/awf.c:1487 src/awf.c:1817
 msgid "More..."
 msgstr "Plus..."
 
-#: src/awf.c:810 src/awf.c:826
+#: src/awf.c:1723 src/awf.c:1736 src/awf.c:1773 src/awf.c:1785
 msgid "No theme found"
 msgstr "Aucun thème trouvé"
 
-#: src/awf.c:2074
+#: src/awf.c:2118
 msgid "Ok"
 msgstr "Ok"
 
-#: src/awf.c:834
+#: src/awf.c:1793
 msgid "Open recent file"
 msgstr "Ouvrir un fichier récent"
 
-#: src/awf.c:241
+#: src/awf.c:234
 msgid "Options:"
 msgstr "Options :"
 
-#: src/awf.c:843
+#: src/awf.c:1802
 msgid "Refresh theme"
 msgstr "Actualiser le thème"
 
-#: src/awf.c:246
+#: src/awf.c:239
 msgid "Run and save a png screenshot on sighup"
 msgstr "Démarrer et enregistrer une capture d'écran png lors du sighup"
 
-#: src/awf.c:245
+#: src/awf.c:238
 msgid "Run with the specified theme"
 msgstr "Démarrer avec le thème spécifié"
 
-#: src/awf.c:242
-msgid "Show version number (and quit)"
-msgstr "Afficher le numéro de version (et quitter)"
+#: src/awf.c:235
+msgid "Show version number"
+msgstr "Afficher le numéro de version"
 
-#: src/awf.c:347 src/awf.c:627
+#: src/awf.c:367 src/awf.c:624
 #, c-format
 msgid "Theme %s loaded."
 msgstr "Thème %s chargé."
 
-#: src/awf.c:365
+#: src/awf.c:350
 #, c-format
 msgid "Theme %s reloaded at"
 msgstr "Thème %s rechargé à"
 
-#: src/awf.c:554
+#: src/awf.c:559
 #, c-format
 msgid "Theme reloaded, then screenshot saved (%s) at"
 msgstr "Thème rechargé, puis capture d'écran enregistrée (%s) à"
 
-#: src/awf.c:2076
+#: src/awf.c:2120
 msgid "This is a question bar."
 msgstr "Ceci est une barre de question."
 
-#: src/awf.c:2082
+#: src/awf.c:2126
 msgid "This is a warning bar."
 msgstr "Ceci est une barre d'avertissement."
 
-#: src/awf.c:2088
+#: src/awf.c:2132
 msgid "This is an error bar."
 msgstr "Ceci est une barre d'erreur."
 
-#: src/awf.c:2070
+#: src/awf.c:2114
 msgid "This is an info bar."
 msgstr "Ceci est une barre d'information."
 
-#: src/awf.c:237
+#: src/awf.c:230
 msgid "Usage:"
 msgstr "Utilisation :"
 
-#: src/awf.c:828
+#: src/awf.c:1739 src/awf.c:1787
 msgid "_Options"
 msgstr "_Options"
 
-#: src/awf.c:796
+#: src/awf.c:1713 src/awf.c:1763
 msgid "_System theme"
 msgstr "Thème _système"
 
-#: src/awf.c:812
+#: src/awf.c:1726 src/awf.c:1775
 msgid "_User theme"
 msgstr "Thème _utilisateur"
 
-#: src/awf.c:231 src/awf.c:2033
+#: src/awf.c:224 src/awf.c:2077
 #, c-format
 msgid "compiled with gtk %d.%d.%d and glib %d.%d.%d"
 msgstr " compilé avec gtk %d.%d.%d et glib %d.%d.%d"
+
+#: src/awf.c:1740
+msgid "gtk-about"
+msgstr ""
