@@ -25,6 +25,8 @@ The *build.sh* script will compile the program with all major GTK version availa
 ![A widget factory - GTK 3](images/gtk3.png?raw=true)
 ![A widget factory - GTK 4](images/gtk4.png?raw=true)
 
+With GTK 4, there is a bug with Pango 1.44.
+
 ## SIGHUP
 
 To auto reload theme on files change, you can use [entr](https://github.com/clibs/entr).
@@ -35,10 +37,10 @@ ls ~/.themes/yourtheme/gtk-3.0/*.css | entr killall -s SIGHUP awf-gtk3
 
 ## Copyright and Credits
 
-A widget factory is provided under the terms of the GNU GPLv3 license.
+This program is provided under the terms of the GNU GPLv3 license.
 
-* Created by Valère Monseur (valere dot monseur at ymail dot com)
-* Updated by Fabrice Creuzot (code hat luigifab dot fr)
+* Updated by Fabrice Creuzot (luigifab)
+* Created by Valère Monseur (valr)
 * Thanks to Ottoman Kent (for testing in ubuntu and bug report)
 * Thanks to Dwight Engen (for rpm specification file: awf.spec.in)
-* Thanks to Josef Radinger (for sorted menus, text in progress bars, treeviews with(out) scrollbars)
+* Thanks to Josef Radinger (for sorted menus, text in progress bars, treeviews with scrollbars)
