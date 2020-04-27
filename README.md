@@ -2,8 +2,6 @@
 
 Work in progress.
 
-## About
-
 A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme.
 
 ## Installation
@@ -24,8 +22,6 @@ The *build.sh* script will compile the program with all major GTK version availa
 ![A widget factory - GTK 2](images/gtk2.png?raw=true)
 ![A widget factory - GTK 3](images/gtk3.png?raw=true)
 ![A widget factory - GTK 4](images/gtk4.png?raw=true)
-
-With GTK 4, there is a bug with Pango 1.44.
 
 ## SIGHUP
 
