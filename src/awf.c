@@ -3,7 +3,7 @@
  * https://github.com/luigifab/awf
  *
  * Forked from
- *  Copyright 2011-2017 | Valère Monseur <valere~monseur~ymail~com>
+ *  Copyright 2011-2017 | Valère Monseur (valr) <valere~monseur~ymail~com>
  *  https://github.com/valr/awf
  *
  * Forked from
@@ -42,7 +42,7 @@
  *  Ubuntu 16.04 (live/1272 MB) GTK 3.18
  *  Ubuntu 16.10 (live/1272 MB) GTK 3.20
  *  Ubuntu 17.04 (live/1272 MB) GTK 3.22
- *  Debian Testing      GTK 3.24 + GTK 3.98 + GTK 2.24 + GLIB 2.64
+ *  Debian Testing   GTK 3.98 + GTK 3.24 + GTK 2.24 + GLIB 2.64
  */
 
 // includes
@@ -137,6 +137,7 @@ static void awf2_create_treview (GtkWidget *root);
 // menuitems
 #if GTK_CHECK_VERSION (3,98,0)
 static void awf2_create_menubar (GMenu *root);
+static void awf2_gtk4_wrapper (GSimpleAction *simple, GVariant *parameter, gpointer user_data);
 #else
 static void awf2_create_menubar (GtkWidget *root);
 static GtkWidget* awf2_new_menu (GtkWidget *root, gchar *text);
@@ -231,8 +232,8 @@ int main (int argc, char **argv) {
 					"awf-gtk3[.sh] ", "(gtk 3.0+)",
 					"awf-gtk4[.sh] ", "(gtk 3.98+)",
 					_("Options:"),
-					"-v            ", _("Show version number (and quit)"),
-					"-l            ", _("List available themes (and quit)"),
+					"-v            ", _("Show version number"),
+					"-l            ", _("List available themes"),
 					"-n            ", _("Don't start spinners"),
 					"-t <theme>    ", _("Run with the specified theme"),
 					"-s <filename> ", _("Run and save a png screenshot on sighup")
@@ -588,7 +589,7 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 	#endif
 
 	gtk_window_set_title (GTK_WINDOW (window), g_strdup_printf (_("A widget factory - GTK %d - %s"), TRUE_GTK_MAJOR_VERSION, VERSION));
-	gtk_window_set_icon_name (GTK_WINDOW (window), "awf");
+	gtk_window_set_icon_name (GTK_WINDOW (window), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 	awf2_set_theme (theme);
 	allow_update_theme = FALSE;
 
@@ -1093,7 +1094,7 @@ static void awf2_create_radiobuttons (GtkWidget *root) {
 
 static void awf2_create_otherbuttons (GtkWidget *root) {
 
-	const gchar *scale_icons[] = { "awf", NULL };
+	const gchar *scale_icons[] = { g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION), NULL };
 	GtkWidget *button1, *button2, *button3, *button4, *button5, *button6, *button7, *button8, *button9, *button10, *button11, *button12;
 	GtkWidget *combomenu1, *combomenu2;
 
@@ -1703,16 +1704,17 @@ static void awf2_create_menubar (GMenu *root) {
 
 	GMenu *menu;
 	GMenuItem *menuitem;
+	GSimpleActionGroup *group;
 	GSList *iterator;
-	gint idx;
+
+	group = g_simple_action_group_new ();
 
 	menu = g_menu_new ();
 	g_menu_append_submenu (root, _("_System theme"), G_MENU_MODEL (menu));
-	for (iterator = list_system_theme, idx = 0; iterator; iterator = iterator->next) {
+	for (iterator = list_system_theme; iterator; iterator = iterator->next) {
 		menuitem = g_menu_item_new (iterator->data, NULL);
 		g_menu_item_set_action_and_target_value (menuitem, "awf2_set_theme", iterator->data);
-		g_menu_insert_item (menu, idx, menuitem);
-		idx++;
+		g_menu_append_item (menu, menuitem);
 		//if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
 		//	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
 	}
@@ -1722,11 +1724,10 @@ static void awf2_create_menubar (GMenu *root) {
 
 	menu = g_menu_new ();
 	g_menu_append_submenu (root, _("_User theme"), G_MENU_MODEL (menu));
-	for (iterator = list_user_theme, idx = 0; iterator; iterator = iterator->next) {
+	for (iterator = list_user_theme; iterator; iterator = iterator->next) {
 		menuitem = g_menu_item_new (iterator->data, NULL);
 		g_menu_item_set_action_and_target_value (menuitem, "awf2_set_theme", iterator->data);
-		g_menu_insert_item (menu, idx, menuitem);
-		idx++;
+		g_menu_append_item (menu, menuitem);
 		//if (strcmp ((gchar*)current_theme, (gchar*)iterator->data) == 0)
 		//	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menuitem), TRUE);
 	}
@@ -1736,7 +1737,16 @@ static void awf2_create_menubar (GMenu *root) {
 
 	menu = g_menu_new ();
 	g_menu_append_submenu (root, _("_Options"), G_MENU_MODEL (menu));
-	g_menu_append (menu, _("gtk-about"), "awf2_show_dialog_about");
+		menuitem = g_menu_item_new (_("gtk-about"), "undo");
+		g_menu_append_item (menu, menuitem);
+		GAction *undo_action = G_ACTION (g_simple_action_new ("undo", NULL));
+		g_signal_connect (G_OBJECT (undo_action), "activate", G_CALLBACK (awf2_show_dialog_about), NULL);
+		g_action_map_add_action (G_ACTION_MAP (group), undo_action);
+}
+
+static void awf2_gtk4_wrapper (GSimpleAction *simple, GVariant *parameter, gpointer user_data) {
+	g_print ("%s\n", g_variant_get_string (parameter, NULL));
+	g_print ("%s\n", user_data);
 }
 
 #else
@@ -1956,7 +1966,7 @@ static void awf2_show_dialog_open () {
 		GTK_RESPONSE_ACCEPT,
 		NULL);
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), "awf");
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -1978,7 +1988,7 @@ static void awf2_show_dialog_open_recent () {
 			GTK_RESPONSE_ACCEPT,
 			NULL);
 
-		gtk_window_set_icon_name (GTK_WINDOW (dialog), "awf");
+		gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 		gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 	#endif
@@ -2000,7 +2010,7 @@ static void awf2_show_dialog_save () {
 		GTK_RESPONSE_ACCEPT,
 		NULL);
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), "awf");
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2021,7 +2031,7 @@ static void awf2_show_dialog_properties () {
 	gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog), _("A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."));
 
 	gtk_window_set_title (GTK_WINDOW (dialog), "GtkMessageDialog");
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), "awf");
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2036,7 +2046,7 @@ static void awf2_show_dialog_page_setup () {
 		"GtkPageSetupUnixDialog",
 		GTK_WINDOW (window));
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), "awf");
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2051,7 +2061,7 @@ static void awf2_show_dialog_print () {
 		"GtkPrintUnixDialog",
 		GTK_WINDOW (window));
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), "awf");
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2072,8 +2082,8 @@ static void awf2_show_dialog_about () {
 				glib_major_version, glib_minor_version, glib_micro_version)),
 		"website", "https://github.com/luigifab/awf",
 		"copyright", "Copyright © 2011-2017 Valère Monseur\nCopyright © 2020 Fabrice Creuzot",
-		"icon-name", "awf",
-		"logo-icon-name", "awf",
+		"icon-name", g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION),
+		"logo-icon-name", g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION),
 		"license", "A widget factory is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.",
 		"wrap-license", TRUE,
 		NULL);
@@ -2145,7 +2155,7 @@ static void awf2_show_dialog_calendar () {
 	#endif
 
 	gtk_window_set_title (GTK_WINDOW (dialog), "GtkDialog");
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), "awf");
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
