@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=A widget factory
-Comment=A widget factory is a theme preview application for gtk4.
-Exec=awf-gtk4
-Icon=awf-gtk4
-Terminal=false
-Type=Application
-Categories=GTK;Development;
-StartupNotify=true

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# remove old build
+# remove old builds
 rm -f awf-gtk2 awf-gtk3 awf-gtk4
 
 # copy to a tmp directory
@@ -28,6 +28,7 @@ make > ../log
 # final
 cp src/awf-gtk* ..
 
+# copy
 cd ..
 ls -altrh awf-gtk4 awf-gtk3 awf-gtk2
 rm -rf builder/
