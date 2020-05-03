@@ -589,7 +589,7 @@ static void awf2_create_window (gpointer app, gchar *theme) {
 	#endif
 
 	gtk_window_set_title (GTK_WINDOW (window), g_strdup_printf (_("A widget factory - GTK %d - %s"), TRUE_GTK_MAJOR_VERSION, VERSION));
-	gtk_window_set_icon_name (GTK_WINDOW (window), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+	gtk_window_set_icon_name (GTK_WINDOW (window), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 	awf2_set_theme (theme);
 	allow_update_theme = FALSE;
 
@@ -1094,7 +1094,7 @@ static void awf2_create_radiobuttons (GtkWidget *root) {
 
 static void awf2_create_otherbuttons (GtkWidget *root) {
 
-	const gchar *scale_icons[] = { g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION), NULL };
+	const gchar *scale_icons[] = { g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION), NULL };
 	GtkWidget *button1, *button2, *button3, *button4, *button5, *button6, *button7, *button8, *button9, *button10, *button11, *button12;
 	GtkWidget *combomenu1, *combomenu2;
 
@@ -1746,7 +1746,7 @@ static void awf2_create_menubar (GMenu *root) {
 
 static void awf2_gtk4_wrapper (GSimpleAction *simple, GVariant *parameter, gpointer user_data) {
 	g_print ("%s\n", g_variant_get_string (parameter, NULL));
-	g_print ("%s\n", user_data);
+	g_print ("%s\n", (gchar*)user_data);
 }
 
 #else
@@ -1966,7 +1966,7 @@ static void awf2_show_dialog_open () {
 		GTK_RESPONSE_ACCEPT,
 		NULL);
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -1988,7 +1988,7 @@ static void awf2_show_dialog_open_recent () {
 			GTK_RESPONSE_ACCEPT,
 			NULL);
 
-		gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+		gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 		gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 	#endif
@@ -2010,7 +2010,7 @@ static void awf2_show_dialog_save () {
 		GTK_RESPONSE_ACCEPT,
 		NULL);
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2031,7 +2031,7 @@ static void awf2_show_dialog_properties () {
 	gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog), _("A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."));
 
 	gtk_window_set_title (GTK_WINDOW (dialog), "GtkMessageDialog");
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2046,7 +2046,7 @@ static void awf2_show_dialog_page_setup () {
 		"GtkPageSetupUnixDialog",
 		GTK_WINDOW (window));
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2061,7 +2061,7 @@ static void awf2_show_dialog_print () {
 		"GtkPrintUnixDialog",
 		GTK_WINDOW (window));
 
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
@@ -2082,8 +2082,8 @@ static void awf2_show_dialog_about () {
 				glib_major_version, glib_minor_version, glib_micro_version)),
 		"website", "https://github.com/luigifab/awf",
 		"copyright", "Copyright © 2011-2017 Valère Monseur\nCopyright © 2020 Fabrice Creuzot",
-		"icon-name", g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION),
-		"logo-icon-name", g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION),
+		"icon-name", g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION),
+		"logo-icon-name", g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION),
 		"license", "A widget factory is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.",
 		"wrap-license", TRUE,
 		NULL);
@@ -2155,7 +2155,7 @@ static void awf2_show_dialog_calendar () {
 	#endif
 
 	gtk_window_set_title (GTK_WINDOW (dialog), "GtkDialog");
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk", TRUE_GTK_MAJOR_VERSION));
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
