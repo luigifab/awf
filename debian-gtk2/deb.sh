@@ -21,6 +21,12 @@ cp ../LICENSE               builder/awf-${gtk}-${version}/COPYING
 sed -i 's/ -eq 3/ -eq -1/g' builder/awf-${gtk}-${version}/configure.ac
 sed -i 's/ -eq 4/ -eq -1/g' builder/awf-${gtk}-${version}/configure.ac
 for file in builder/awf-${gtk}-${version}/icons/*/*/*; do mv $file ${file/\/awf./\/awf-${gtk}.}; done
+for file in builder/awf-${gtk}-${version}/src/*.po; do
+	lang=$(basename "$file" .po)
+	lang=${lang/trad-/}
+	mkdir -p builder/awf-${gtk}-${version}/locale/${lang}/LC_MESSAGES
+	msgfmt   builder/awf-${gtk}-${version}/src/trad-${lang}.po -o builder/awf-${gtk}-${version}/locale/${lang}/LC_MESSAGES/awf-${gtk}.mo
+done
 
 cd builder/
 tar czf awf-${gtk}-${version}.tar.gz awf-${gtk}-${version}/
@@ -30,11 +36,12 @@ cd ..
 cd builder/awf-${gtk}-${version}/
 dh_make -s -y -f ../awf-${gtk}-${version}.tar.gz
 rm -f debian/*ex debian/*EX debian/README* debian/*doc*
-cp ../../control   debian/control
-cp ../../changelog debian/changelog
+cp ../../control   debian/
+cp ../../changelog debian/
 cp ../../copyright debian/
+cp ../../install   debian/
+cp ../../watch     debian/
 cp ../../rules     debian/
-cp ../../install   debian/install
 cp ../../lintian   debian/awf-${gtk}.lintian-overrides
 dpkg-buildpackage -us -uc
 cd ..

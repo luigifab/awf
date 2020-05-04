@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=AWF GTK4
-Comment=A widget factory is a theme preview application.
-Comment[fr]=La fabrique à widgets est une application d'aperçu de thème.
+Comment=A widget factory is a theme preview application for GTK.
+Comment[fr]=La fabrique à widgets est une application d'aperçu de thème pour GTK.
 Exec=awf-gtk4
 Icon=awf-gtk4
 Terminal=false
