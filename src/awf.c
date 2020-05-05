@@ -20,14 +20,13 @@
  * merchantability or fitness for a particular purpose. See the
  * GNU General Public License (GPL) for more details.
  *
- *
- * A Widget Factory is a program designed to show a wide range of widgets on a single window.
+ * ---
  *
  * Translations update:
  *  xgettext -d awf -o src/awf.pot -k_ -s src/awf.c
- *  cp src/awf.pot src/fr/awf.po
- *  msgmerge src/fr/awf.po src/awf.pot -o src/fr/awf.po
- *  msgfmt src/fr/awf.po -o src/fr/LC_MESSAGES/awf.mo
+ *  cp src/awf.pot src/trad-fr.po
+ *  msgmerge src/trad-fr.po src/awf.pot -o src/trad-fr.po
+ *  msgfmt src/trad-fr.po -o src/fr/LC_MESSAGES/awf.mo
  *
  * GTK versions tested:
  *  Ubuntu 11.04 (live/768  MB) GTK 3.0  + GTK 2.24 + GLIB 2.28
@@ -61,15 +60,16 @@
 // defines
 
 #define _(String) gettext (String)
-#define GETTEXT_PACKAGE "awf"
 
 #if GTK_CHECK_VERSION (3,98,0)
 	#define TRUE_GTK_MAJOR_VERSION 4
+	#define GETTEXT_PACKAGE "awf-gtk4"
 	#define gtk_major_version gtk_get_major_version ()
 	#define gtk_minor_version gtk_get_minor_version ()
 	#define gtk_micro_version gtk_get_micro_version ()
 #elif GTK_CHECK_VERSION (3,0,0)
 	#define TRUE_GTK_MAJOR_VERSION 3
+	#define GETTEXT_PACKAGE "awf-gtk3"
 	#define gtk_major_version gtk_get_major_version ()
 	#define gtk_minor_version gtk_get_minor_version ()
 	#define gtk_micro_version gtk_get_micro_version ()
@@ -83,6 +83,7 @@
 	#define BOXVPANE (gtk_paned_new (GTK_ORIENTATION_VERTICAL))
 #else
 	#define TRUE_GTK_MAJOR_VERSION 2
+	#define GETTEXT_PACKAGE "awf-gtk2"
 	#define BOXH (gtk_hbox_new (FALSE, 0))
 	#define BOXV (gtk_vbox_new (FALSE, 0))
 	#define BOXHSEP (gtk_hseparator_new ())
@@ -187,10 +188,6 @@ int main (int argc, char **argv) {
 	setlocale (LC_ALL, "");
 	if (g_file_test ("/usr/share/locale", G_FILE_TEST_IS_DIR))
 		bindtextdomain (GETTEXT_PACKAGE, "/usr/share/locale");
-	if (g_file_test ("/var/www/awf/src", G_FILE_TEST_IS_DIR))
-		bindtextdomain (GETTEXT_PACKAGE, "/var/www/awf/src");
-	if (g_file_test ("/home/fabrice/awf/src", G_FILE_TEST_IS_DIR))
-		bindtextdomain (GETTEXT_PACKAGE, "/home/fabrice/awf/src");
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
@@ -1495,7 +1492,7 @@ static void awf2_create_expander (GtkWidget *root) {
 	tv = gtk_text_view_new ();
 	buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (tv));
 	gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (tv), GTK_WRAP_WORD);
-	gtk_text_buffer_set_text (GTK_TEXT_BUFFER (buffer), _("A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."), -1);
+	gtk_text_buffer_set_text (GTK_TEXT_BUFFER (buffer), _("A widget factory is a theme preview application for GTK. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."), -1);
 	gtk_container_add (GTK_CONTAINER (scrolled_window), tv);
 	gtk_container_add (GTK_CONTAINER (expander), scrolled_window);
 
@@ -2028,7 +2025,7 @@ static void awf2_show_dialog_properties () {
 		GTK_BUTTONS_YES_NO,
 		"GtkMessageDialog");
 
-	gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog), _("A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."));
+	gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog), _("A widget factory is a theme preview application for GTK. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."));
 
 	gtk_window_set_title (GTK_WINDOW (dialog), "GtkMessageDialog");
 	gtk_window_set_icon_name (GTK_WINDOW (dialog), g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION));
@@ -2073,7 +2070,7 @@ static void awf2_show_dialog_about () {
 	gtk_show_about_dialog (GTK_WINDOW (window),
 		"version", VERSION,
 		"comments", g_strdup_printf ("%s\n\n%s\n%s",
-			_("A widget factory is a theme preview application for gtk2, gtk3 and gtk4. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."),
+			_("A widget factory is a theme preview application for GTK. It displays the various widget types provided by GTK in a single window allowing to see the visual effect of the applied theme."),
 			g_strdup_printf (_("compiled with gtk %d.%d.%d and glib %d.%d.%d"),
 				GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION,
 				GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION, GLIB_MICRO_VERSION),
