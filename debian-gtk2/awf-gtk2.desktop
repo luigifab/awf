@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=AWF GTK2
+Name=AWF GTK 2
 Comment=A widget factory is a theme preview application for GTK.
 Comment[fr]=La fabrique à widgets est une application d'aperçu de thème pour GTK.
 Exec=awf-gtk2
