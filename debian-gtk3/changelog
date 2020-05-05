@@ -1,4 +1,4 @@
-awf-gtk3 (2.0.0-1) UNRELEASED; urgency=low
+awf-gtk3 (2.0.0-2) UNRELEASED; urgency=low
 
   * Initial debian package release (Closes: #959436)
 

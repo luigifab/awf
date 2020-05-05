@@ -1,2 +1,2 @@
 version=4
-https://github.com/luigifab/awf-extended/releases .*awf-([0-9.]+).*gz
+https://github.com/luigifab/awf-extended/releases .*awf-([0-9.]+)\.tar\.gz

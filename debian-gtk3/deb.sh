@@ -3,7 +3,7 @@
 gtk="gtk3"
 version="2.0.0"
 cd debian-${gtk}/
-rm -rf *.deb builder/*/*
+rm -rf builder/
 
 # copy to a tmp directory
 mkdir builder
@@ -36,6 +36,7 @@ cd ..
 cd builder/awf-${gtk}-${version}/
 dh_make -s -y -f ../awf-${gtk}-${version}.tar.gz
 rm -f debian/*ex debian/*EX debian/README* debian/*doc*
+mkdir debian/upstream
 cp ../../control   debian/
 cp ../../changelog debian/
 cp ../../copyright debian/
@@ -43,11 +44,11 @@ cp ../../install   debian/
 cp ../../watch     debian/
 cp ../../rules     debian/
 cp ../../lintian   debian/awf-${gtk}.lintian-overrides
+cp ../../upstream  debian/upstream/metadata
 dpkg-buildpackage -us -uc
 cd ..
-debsign awf-${gtk}_${version}-1_amd64.changes
+debsign awf-${gtk}_${version}-*.changes
 cd ..
 
 # cleanup
 rm -rf builder/awf-${gtk}-${version}/ builder/awf-${gtk}-${version}.tar.gz
-rm builder/*dbg*

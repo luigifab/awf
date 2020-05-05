@@ -2,7 +2,8 @@ Source: awf-gtk2
 Section: x11
 Priority: optional
 Maintainer: Fabrice Creuzot <code@luigifab.fr>
-Build-Depends: debhelper-compat (= 13), dh-autoreconf, libgtk2.0-dev
+Build-Depends: debhelper-compat (= 13), libgtk2.0-dev
+Rules-Requires-Root: no
 Standards-Version: 4.5.0
 Homepage: https://github.com/luigifab/awf-extended
 Vcs-Browser: https://github.com/luigifab/awf-extended
