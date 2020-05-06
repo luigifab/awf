@@ -24,9 +24,8 @@
  *
  * Translations update:
  *  xgettext -d awf -o src/awf.pot -k_ -s src/awf.c
- *  cp src/awf.pot src/trad-fr.po
- *  msgmerge src/trad-fr.po src/awf.pot -o src/trad-fr.po
- *  msgfmt src/trad-fr.po -o src/fr/LC_MESSAGES/awf.mo
+ *  msgmerge src/trans-fr.po src/awf.pot -o src/trans-fr.po
+ *  msgfmt src/trans-fr.po -o src/fr/LC_MESSAGES/awf.mo
  *
  * GTK versions tested:
  *  Ubuntu 11.04 (live/768  MB) GTK 3.0  + GTK 2.24 + GLIB 2.28
@@ -1734,7 +1733,7 @@ static void awf2_create_menubar (GMenu *root) {
 
 	menu = g_menu_new ();
 	g_menu_append_submenu (root, _("_Options"), G_MENU_MODEL (menu));
-		menuitem = g_menu_item_new (_("gtk-about"), "undo");
+		menuitem = g_menu_item_new ("gtk-about", "undo");
 		g_menu_append_item (menu, menuitem);
 		GAction *undo_action = G_ACTION (g_simple_action_new ("undo", NULL));
 		g_signal_connect (G_OBJECT (undo_action), "activate", G_CALLBACK (awf2_show_dialog_about), NULL);
@@ -2078,7 +2077,7 @@ static void awf2_show_dialog_about () {
 				gtk_major_version, gtk_minor_version, gtk_micro_version,
 				glib_major_version, glib_minor_version, glib_micro_version)),
 		"website", "https://github.com/luigifab/awf",
-		"copyright", "Copyright © 2011-2017 Valère Monseur\nCopyright © 2020 Fabrice Creuzot",
+		"copyright", "Copyright © 2020 Fabrice Creuzot (luigifab)\nCopyright © 2011-2017 Valère Monseur (valr)",
 		"icon-name", g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION),
 		"logo-icon-name", g_strdup_printf ("awf-gtk%d", TRUE_GTK_MAJOR_VERSION),
 		"license", "A widget factory is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.",
