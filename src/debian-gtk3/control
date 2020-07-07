@@ -1,17 +1,19 @@
-Source: awf-gtk2
+Source: awf-gtk3
 Section: x11
 Priority: optional
 Maintainer: Fabrice Creuzot <code@luigifab.fr>
-Build-Depends: debhelper-compat (= 13), libgtk2.0-dev
+Build-Depends: debhelper-compat (= 13), libgtk-3-dev
 Rules-Requires-Root: no
 Standards-Version: 4.5.0
 Homepage: https://github.com/luigifab/awf-extended
 Vcs-Browser: https://github.com/luigifab/awf-extended
 Vcs-Git: https://github.com/luigifab/awf-extended.git
 
-Package: awf-gtk2
+Package: awf-gtk3
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: A widget factory is a theme preview application for gtk2,
+Description: A widget factory is a theme preview application for GTK
  It displays the various widget types provided by GTK in a single window
  allowing to see the visual effect of the applied theme.
+ .
+ This package include the gtk3 version.

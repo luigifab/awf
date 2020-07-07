@@ -1,7 +1,7 @@
 #!/bin/bash
 
 gtk="gtk2"
-version="2.0.0"
+version="2.1.0"
 cd debian-${gtk}/
 rm -rf builder/
 
@@ -17,15 +17,14 @@ cp -r ../src                builder/awf-${gtk}-${version}/
 cp awf-${gtk}.desktop       builder/awf-${gtk}-${version}/
 cp ../Makefile.am           builder/awf-${gtk}-${version}/
 cp ../configure.ac          builder/awf-${gtk}-${version}/
-cp ../LICENSE               builder/awf-${gtk}-${version}/COPYING
+cp /usr/share/common-licenses/GPL-3 builder/awf-${gtk}-${version}/COPYING
 sed -i 's/ -eq 3/ -eq -1/g' builder/awf-${gtk}-${version}/configure.ac
 sed -i 's/ -eq 4/ -eq -1/g' builder/awf-${gtk}-${version}/configure.ac
 for file in builder/awf-${gtk}-${version}/icons/*/*/*; do mv $file ${file/\/awf./\/awf-${gtk}.}; done
-for file in builder/awf-${gtk}-${version}/src/*.po; do
+for file in builder/awf-${gtk}-${version}/src/po/*.po; do
 	lang=$(basename "$file" .po)
-	lang=${lang/trad-/}
 	mkdir -p builder/awf-${gtk}-${version}/locale/${lang}/LC_MESSAGES
-	msgfmt   builder/awf-${gtk}-${version}/src/trad-${lang}.po -o builder/awf-${gtk}-${version}/locale/${lang}/LC_MESSAGES/awf-${gtk}.mo
+	msgfmt   builder/awf-${gtk}-${version}/src/po/${lang}.po -o builder/awf-${gtk}-${version}/locale/${lang}/LC_MESSAGES/awf-${gtk}.mo
 done
 
 cd builder/

@@ -10,7 +10,7 @@ touch builder/ChangeLog
 touch builder/NEWS
 touch builder/AUTHORS
 touch builder/README
-cp LICENSE         builder/COPYING
+cp /usr/share/common-licenses/GPL-3 builder/COPYING
 cp configure.ac    builder/
 cp Makefile.am     builder/
 cp src/Makefile.am builder/src/
