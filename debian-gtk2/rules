@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_update_autotools_config:
+	sed -i 's/ -eq 3/ -eq -1/g' configure.ac
+	sed -i 's/ -eq 4/ -eq -1/g' configure.ac
+	touch NEWS
+	touch AUTHORS
+	touch README
+	touch ChangeLog
+	mv LICENSE COPYING
+	for file in icons/*/*/*.png; do mv $$file `dirname $$file`/awf-gtk2.png; done
+	for file in icons/*/*/*.svg; do mv $$file `dirname $$file`/awf-gtk2.svg; done
+	for file in src/po/*.po; do \
+		code=`basename "$$file" .po`; \
+		mkdir -p locale/$$code/LC_MESSAGES/; \
+		msgfmt src/po/$$code.po -o locale/$$code/LC_MESSAGES/awf-gtk2.mo; \
+	done

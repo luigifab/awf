@@ -1,0 +1,5 @@
+awf-gtk4 (2.2.0-5) experimental; urgency=low
+
+  * Initial debian package release (Closes: #959433)
+
+ -- Fabrice Creuzot <code@luigifab.fr>  Wed, 11 Nov 2020 12:00:00 +0000
